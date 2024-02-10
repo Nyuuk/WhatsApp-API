@@ -8,9 +8,11 @@ import ResponseHelper from "./helpers/ResponseHelper";
 dotenv.config();
 
 const WA = new WhatsApp();
-WA.makeConnection();
 
 const api = express();
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 api.use(express.json());
 api.use(express.urlencoded({ extended: true }));
 
@@ -54,6 +56,22 @@ api.use(
         next();
     }
 );
+app.use((req: express.Request, res: express.Response, next) => {
+    const api_key = req.get("x-api-key");
+    if (!api_key) {
+        ResponseHelper(res, "x-api-key is required", 404)
+        return;
+    }
+    if (api_key !== process.env.X_API_KEY) {
+        ResponseHelper(res, "x-api-key is invalid", 404)
+        return;
+    }
+    next();
+})
+
+app.get("/get-time", async (req: express.Request, res) => {
+    ResponseHelper(res, Math.floor(Date.now() / 1000))
+})
 
 api.post("/send-message", async (req: express.Request, res) => {
     const json = req.body;
@@ -97,6 +115,9 @@ api.post("/send-some-messages", async (req: express.Request, res) => {
     ResponseHelper(res, { dataError, dataSuccess }, 200)
 });
 
-api.listen(3000, async () => {
+app.use("/api", api);
+
+app.listen(3000, async () => {
     console.log("Listening on port 3000");
+    WA.makeConnection();
 });
