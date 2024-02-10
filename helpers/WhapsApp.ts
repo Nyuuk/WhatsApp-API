@@ -51,7 +51,7 @@ export default class WhatsApp {
         const { version, isLatest } = await fetchLatestBaileysVersion();
         this.client = makeWASocket({
             version,
-            logger: P({ level: "silent" }),
+            // logger: P({ level: "silent" }),
             printQRInTerminal: !usePairingCode, // If you want to use scan, then change the value of this variable to false
             browser: ["chrome (linux)", "", ""], // If you change this then the pairing code will not work
             mobile: false,
