@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 import express from "express";
 import WhatsApp from "./helpers/WhapsApp";
 import crypto from "crypto";
-import { HeadersInterface } from "./define.md";
 
 dotenv.config();
 
@@ -38,7 +37,7 @@ api.use((req: express.Request, res: express.Response, next: express.NextFunction
         })
         return;
     }
-    const hasSecret = crypto.createHash('sha256').update(process.env.X_API_KEY + req.originalUrl).digest('hex');
+    const hasSecret = crypto.createHash('sha256').update(process.env.X_API_KEY + req.originalUrl + Math.floor(Date.now() / 1000)).digest('hex');
     if (secret !== hasSecret) {
         res.status(404).json({
             message: "x-api-secret is invalid",
