@@ -1,6 +1,9 @@
 # session Name
 bvvip/
 
+# all of js file
+**.js
+
 # Logs
 logs
 *.log
