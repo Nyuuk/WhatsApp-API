@@ -41,18 +41,18 @@ api.use(
             .createHash("sha256")
             .update(
                 process.env.X_API_KEY +
-                    req.originalUrl +
-                    Math.floor(Date.now() / 1000)
+                    req.originalUrl
+                    // Math.floor(Date.now() / 1000)
             )
             .digest("hex");
         if (secret !== hasSecret) {
             ResponseHelper(res, "x-api-secret is invalid", 404)
             return;
         }
-        if (req.body.timestamp !== Math.floor(Date.now() / 1000)) {
-            ResponseHelper(res, "timestamp is invalid", 404)
-            return;
-        }
+        // if (req.body.timestamp !== Math.floor(Date.now() / 1000)) {
+        //     ResponseHelper(res, "timestamp is invalid", 404)
+        //     return;
+        // }
         next();
     }
 );
