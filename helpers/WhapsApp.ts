@@ -8,7 +8,6 @@ import makeWASocket, {
 } from "@whiskeysockets/baileys";
 import dotenv from "dotenv";
 import { Boom } from "@hapi/boom";
-import P from "pino";
 import logger from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
 import readline from "readline";
@@ -17,7 +16,11 @@ dotenv.config()
 
 export default class WhatsApp {
     private client: any;
-    public constructor() {}
+    private phoneNumber: number
+    private qrCode: string | undefined
+    public constructor() {
+        this.phoneNumber = parseInt(process.env.PHONE_NUMBER|| "6285156803524", 10);
+    }
 
     public async makeConnection(): Promise<void> {
         const usePairingCode = false;
@@ -51,16 +54,16 @@ export default class WhatsApp {
         const { version, isLatest } = await fetchLatestBaileysVersion();
         this.client = makeWASocket({
             version,
-            logger: P({ level: "silent" }),
+            // logger: P({ level: "silent" }),
             printQRInTerminal: !usePairingCode, // If you want to use scan, then change the value of this variable to false
             browser: ["chrome (linux)", "", ""], // If you change this then the pairing code will not work
-            mobile: false,
             auth: {
                 creds: state.creds,
                 /** caching makes the store faster to send/recv messages */
                 keys: makeCacheableSignalKeyStore(state.keys, logger),
             },
             msgRetryCounterCache,
+            mobile: false,
             markOnlineOnConnect: false,
             // generateHighQualityLinkPreview: true,
         });
@@ -70,11 +73,14 @@ export default class WhatsApp {
 
         // Pairing code for Web clients
         if (usePairingCode && !this.client.authState.creds.registered) {
-            const phoneNumber = await question(
-                "Enter your active whatsapp number: "
-            );
-            const code = await this.client.requestPairingCode(phoneNumber);
-            console.log(`pairing with this code: ${code}`);
+            // const phoneNumber =  await question(
+            //     "Enter your active whatsapp number: "
+            //  )
+            setTimeout(async () => {
+                console.log("Please scan the QR code above");
+                const code = await this.client.requestPairingCode(`${this.phoneNumber}`);
+                console.log(`pairing with this code: ${code}`);
+            }, 3000)
         }
         this.client.ev.process(async (events: BaileysEventMap) => {
             if (events["connection.update"]) {
@@ -93,6 +99,7 @@ export default class WhatsApp {
                 }
 
                 console.log("connection update", update);
+                this.qrCode = update.qr
             }
             // credentials updated -- save them
             if (events["creds.update"]) {
@@ -108,5 +115,8 @@ export default class WhatsApp {
         return r;
     }
 
+    async getQrCode() {
+        return this.qrCode
+    }
 
 }
