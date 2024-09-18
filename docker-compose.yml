@@ -7,3 +7,4 @@ services:
       - "3123:3123"
     volumes:
       - ./bvvip:/app/bvvip
+    restart: always
