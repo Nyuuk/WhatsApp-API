@@ -5,3 +5,5 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3123:3123"
+    volumes:
+      - ./bvvip:/app/bvvip
