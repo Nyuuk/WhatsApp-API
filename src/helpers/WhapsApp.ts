@@ -114,19 +114,22 @@ export default class WhatsApp {
                 if (upsert.type === "notify") {
                     for (const msg of upsert.messages) {
                         console.log("msg", msg);
-
-                        if (msg!.message!.extendedTextMessage!.text === "!groupid") {
-                            const slid = "====="
-                            const replyMSG = `${slid}\nGroupID: ${msg.key.remoteJid}\n${slid}`;
-                            console.log("reply msg ", replyMSG);
-                            try {
-                                if (msg.key.remoteJid) await this.sendGroupMessage(
-                                    msg!.key!.remoteJid,
-                                    replyMSG
-                                );
-                            } catch (error) {
-                                console.error(error);
+                        try {
+                            if (msg!.message!.extendedTextMessage!.text === "!groupid") {
+                                const slid = "====="
+                                const replyMSG = `${slid}\nGroupID: ${msg.key.remoteJid}\n${slid}`;
+                                console.log("reply msg ", replyMSG);
+                                try {
+                                    if (msg.key.remoteJid) await this.sendGroupMessage(
+                                        msg!.key!.remoteJid,
+                                        replyMSG
+                                    );
+                                } catch (error) {
+                                    console.error(error);
+                                }
                             }
+                        } catch (error) {
+                            console.error(error);
                         }
                     }
                 }
