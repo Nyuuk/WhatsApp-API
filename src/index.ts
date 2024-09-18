@@ -87,6 +87,28 @@ api.post("/send-message", async (req: express.Request, res) => {
     ResponseHelper(res, r)
 });
 
+api.post("/send-message-group", async (req: express.Request, res) => {
+    const json = req.body;
+    if (!json.text) {
+        ResponseHelper(res, 'text is required', 404)
+        return
+    }
+    if (!json.number) {
+        ResponseHelper(res, 'number is invalid & start with 62', 404)
+        return
+    }
+    try {
+        const r = await WA.client.sendMessage(json.number, {
+            text: json.text
+        });
+        ResponseHelper(res, r)
+    } catch (error:any) {
+        ResponseHelper(res, error, 404)
+        return
+    }
+    // const r = await WA.sendGroupMessage(json.number, json.text);
+});
+
 api.post("/send-some-messages", async (req: express.Request, res) => {
     const json = req.body;
     if (!json.data || !json.data.length) {

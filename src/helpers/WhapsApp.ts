@@ -15,7 +15,7 @@ import readline from "readline";
 dotenv.config()
 
 export default class WhatsApp {
-    private client: any;
+    public client: any;
     private phoneNumber: number
     private qrCode: string | undefined
     public constructor() {
@@ -83,6 +83,7 @@ export default class WhatsApp {
             }, 3000)
         }
         this.client.ev.process(async (events: BaileysEventMap) => {
+            console.log(events);
             if (events["connection.update"]) {
                 const update = events["connection.update"];
                 const { connection, lastDisconnect } = update;
@@ -105,13 +106,55 @@ export default class WhatsApp {
             if (events["creds.update"]) {
                 await saveCreds();
             }
+
+            // message received
+            if (events["messages.upsert"]) {
+                const upsert = events["messages.upsert"];
+                console.log("upsert", JSON.stringify(upsert, undefined, 2));
+                if (upsert.type === "notify") {
+                    for (const msg of upsert.messages) {
+                        console.log("msg", msg);
+
+                        if (msg!.message!.extendedTextMessage!.text === "!groupid") {
+                            const slid = "====="
+                            const replyMSG = `${slid}\nGroupID: ${msg.key.remoteJid}\n${slid}`;
+                            console.log("reply msg ", replyMSG);
+                            try {
+                                await this.sendGroupMessage(
+                                    msg.key.remoteJid,
+                                    replyMSG
+                                );
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        }
+                    }
+                }
+            }
         });
+
+        // this.client.ev.on("messages.upsert", async (m: BaileysEventMap["messages.upsert"]) => {
+        //     console.log(JSON.stringify(m, undefined, 2))
+
+        //     console.log('replying to', m.messages[0].key.remoteJid)
+        //     await this.client.sendMessage(m.messages[0].key.remoteJid!, { text: 'Hello there!' })
+        // });
     }
 
     async sendText(number: number, text: string) {
         const r = await this.client.sendMessage(number + "@c.us", {
             text: text,
         });
+        return r;
+    }
+
+    async sendGroupMessage(number: string, text: string) {
+        // const groupID = number + "@g.us";
+        // console.log("sendGroupMessage", number, text);
+        const r = await this.client.sendMessage(number, {
+            text: text,
+        });
+        // const r = {groupID, text}
         return r;
     }
 
