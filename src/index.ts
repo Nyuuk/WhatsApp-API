@@ -139,7 +139,7 @@ api.post("/send-some-messages", async (req: express.Request, res) => {
 
 app.use("/api", api);
 
-app.listen(3000, async () => {
+app.listen(process.env.APP_PORT, async () => {
     console.log("Listening on port 3000");
     WA.makeConnection();
 });
