@@ -1,8 +1,6 @@
 @Library('shared-lib') _
 pipeline {
-  agent {
-    label 'master'
-  }
+  agent any
     environment {
         CHAT_ID = credentials('whatsapp-group')
         // Telegram Message Pre Build
