@@ -67,6 +67,7 @@ pipeline {
             commandSsh('git remote set-url origin https://${Url_Git};')
       }
     }
+  }
     post {
       success {
         script{
@@ -87,7 +88,6 @@ pipeline {
         }
       }
     }
-  }
 }
 def commandSsh(command) {
   sh 'ssh -o StrictHostKeyChecking=no arch@docker.icc.private "cd whatsapp-api; ${command}"'
