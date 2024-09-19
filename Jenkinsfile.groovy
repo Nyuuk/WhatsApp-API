@@ -48,12 +48,6 @@ pipeline {
           commandSsh("git pull origin ${Application_Branch};")
         }
       }
-      stage('NPM Install') {
-        steps {
-        //   sh 'ssh arch@docker.icc.private "cd whatsapp-api; npm install"'
-          commandSsh('npm install;')
-        }
-      }
       stage('Deploy to server') {
         steps {
             // sh 'ssh arch@docker.icc.private "cd whatsapp-api; docker compose up -d --build;"'
