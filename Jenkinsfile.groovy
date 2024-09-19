@@ -87,6 +87,6 @@ pipeline {
       }
     }
 }
-def commandSsh(Strinh command) {
+def commandSsh(String command) {
   sh 'ssh -o StrictHostKeyChecking=no arch@docker.icc.private "cd whatsapp-api; ${command}"'
 }
