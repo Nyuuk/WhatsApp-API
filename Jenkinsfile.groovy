@@ -37,7 +37,7 @@ pipeline {
         steps {
             script {
                 withCredentials([usernamePassword(credentialsId: 'adnan-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    commandSsh('git remote set-url origin https://${USERNAME}:${PASSWORD}@${Url_Git};')
+                    commandSsh("git remote set-url origin https://${USERNAME}:${PASSWORD}@${Url_Git};")
                 }
             }
         }
@@ -45,7 +45,7 @@ pipeline {
       stage('Pull Repository') {
         steps {
         //   sh 'ssh arch@docker.icc.private "cd whatsapp-api; git pull origin ${Application_Branch};"'
-          commandSsh('git pull origin ${Application_Branch};')
+          commandSsh("git pull origin ${Application_Branch};")
         }
       }
       stage('NPM Install') {
@@ -62,7 +62,7 @@ pipeline {
       }
       stage('Change to default origin') {
         steps {
-            commandSsh('git remote set-url origin https://${Url_Git};')
+            commandSsh("git remote set-url origin https://${Url_Git};")
       }
     }
   }
@@ -88,5 +88,5 @@ pipeline {
     }
 }
 def commandSsh(String command) {
-  sh 'ssh -o StrictHostKeyChecking=no arch@docker.icc.private "cd whatsapp-api; ${command}"'
+  sh "ssh -o StrictHostKeyChecking=no arch@docker.icc.private \"cd whatsapp-api; ${command}\""
 }
