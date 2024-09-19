@@ -1,7 +1,7 @@
 @Library('shared-lib') _
 pipeline {
   agent {
-    label 'lutfi-agent-slave-01'
+    label 'master'
   }
     environment {
         CHAT_ID = credentials('whatsapp-group')
