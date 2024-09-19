@@ -26,6 +26,7 @@ pipeline {
       // parameter of application
       string(defaultValue: "main", description: "Branch of Application", name: 'Application_Branch')
       string(defaultValue: "git.incenter.id/adnan/whatsapp-api.git", description: "url git", name: 'Url_Git')
+      string(defaultValue: "main", description: "default branch", name: 'BRANCH_NAME')
     }
     options { disableConcurrentBuilds(abortPrevious: true) }
     stages {
@@ -86,8 +87,8 @@ pipeline {
         }
       }
     }
+  }
 }
-
 def commandSsh(command) {
   sh 'ssh -o StrictHostKeyChecking=no arch@docker.icc.private "cd whatsapp-api; ${command}"'
 }
