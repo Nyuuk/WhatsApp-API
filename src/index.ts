@@ -136,33 +136,33 @@ api.post("/send-message-group", async (req: express.Request, res) => {
     // const r = await WA.sendGroupMessage(json.number, json.text);
 });
 
-api.post("/send-some-messages", async (req: express.Request, res) => {
-    const json = req.body;
-    if (!json.data || !json.data.length) {
-        ResponseHelper(res, 'data is required & array', 404)
-        return;
-    }
-    // looping json.data
-    const dataError: dataMessageInterface[] = [];
-    const dataSuccess: { number: number }[] = [];
-    json.data.forEach(async (data: dataMessageInterface) => {
-        if (!data.text) {
-            dataError.push(data);
-            return;
-        }
-        if (!data.number) {
-            dataError.push(data);
-            return;
-        }
-        const r = await WA.sendText(data.number, data.text);
-        if (!r) {
-            dataError.push(data);
-            return;
-        }
-        dataSuccess.push({ number: data.number });
-    });
-    ResponseHelper(res, { dataError, dataSuccess }, 200)
-});
+// api.post("/send-some-messages", async (req: express.Request, res) => {
+//     const json = req.body;
+//     if (!json.data || !json.data.length) {
+//         ResponseHelper(res, 'data is required & array', 404)
+//         return;
+//     }
+//     // looping json.data
+//     const dataError: dataMessageInterface[] = [];
+//     const dataSuccess: { number: number }[] = [];
+//     json.data.forEach(async (data: dataMessageInterface) => {
+//         if (!data.text) {
+//             dataError.push(data);
+//             return;
+//         }
+//         if (!data.number) {
+//             dataError.push(data);
+//             return;
+//         }
+//         const r = await WA.sendText(data.number, data.text);
+//         if (!r) {
+//             dataError.push(data);
+//             return;
+//         }
+//         dataSuccess.push({ number: data.number });
+//     });
+//     ResponseHelper(res, { dataError, dataSuccess }, 200)
+// });
 
 app.use("/api", api);
 
