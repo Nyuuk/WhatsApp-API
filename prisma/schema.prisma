@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./data.db"
+  url      = "file:../database/data.db"
 }
 
 model Message {
