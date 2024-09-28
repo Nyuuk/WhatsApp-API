@@ -6,6 +6,7 @@ bvvip/
 
 # db
 **.db
+**.db*
 prisma/migrations
 
 # Logs
