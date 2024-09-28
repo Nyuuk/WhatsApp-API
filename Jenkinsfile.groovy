@@ -2,7 +2,8 @@
 pipeline {
   agent any
     environment {
-        CHAT_ID = credentials('whatsapp-group')
+        // CHAT_ID = credentials('whatsapp-group')
+        CHAT_ID = "6285156803524@s.whatsapp.net"
         // Telegram Message Pre Build
         CURRENT_BUILD_NUMBER = "${currentBuild.number}"
         GIT_MESSAGE = sh(returnStdout: true, script: "git log -n 1 --format=%s ${GIT_COMMIT}").trim()
