@@ -136,6 +136,36 @@ api.post("/send-message-group", async (req: express.Request, res) => {
     // const r = await WA.sendGroupMessage(json.number, json.text);
 });
 
+api.get("/get-messages", async (req: express.Request, res) => {
+    const json = req.query;
+    const mark = json.mark === 'true' ? true : false;
+    //  console.log("mark", mark, json.mark)
+
+    const unreadMessage = await WA.prisma.message.findMany({
+        where: {
+            is_read: false
+        }
+    })
+    if (mark) {
+        await WA.prisma.message.updateMany({
+            where: {
+                is_read: false
+            },
+            data: {
+                is_read: true
+            }
+        })
+    }
+    const unreadMessageJson = unreadMessage.map((msg) => {
+        return { ...msg, msg_json: JSON.parse(msg.msg_json) }
+    })
+    const data = {
+        data: unreadMessageJson || [],
+        count: unreadMessage.length
+    }
+    ResponseHelper(res, data)
+})
+
 // api.post("/send-some-messages", async (req: express.Request, res) => {
 //     const json = req.body;
 //     if (!json.data || !json.data.length) {

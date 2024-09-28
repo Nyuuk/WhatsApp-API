@@ -1,25 +1,30 @@
 import makeWASocket, {
+    AnyMessageContent,
     BaileysEventMap,
     DisconnectReason,
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
     makeInMemoryStore,
+    MessageType,
     useMultiFileAuthState,
+    WAMessage,
 } from "@whiskeysockets/baileys";
 import dotenv from "dotenv";
 import { Boom } from "@hapi/boom";
 import logger from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
 import readline from "readline";
+import { PrismaClient } from "@prisma/client";
 
 dotenv.config()
 
 export default class WhatsApp {
+    public prisma = new PrismaClient()
     public client: any;
     private phoneNumber: number
     private qrCode: string | undefined
     public constructor() {
-        this.phoneNumber = parseInt(process.env.PHONE_NUMBER|| "6285156803524", 10);
+        this.phoneNumber = parseInt(process.env.PHONE_NUMBER || "6285156803524", 10);
     }
 
     public async makeConnection(): Promise<void> {
@@ -114,22 +119,39 @@ export default class WhatsApp {
                 if (upsert.type === "notify") {
                     for (const msg of upsert.messages) {
                         console.log("msg", msg);
-                        try {
-                            if (msg!.message!.extendedTextMessage!.text === "!groupid") {
-                                const slid = "====="
-                                const replyMSG = `${slid}\nGroupID: ${msg.key.remoteJid}\n${slid}`;
-                                console.log("reply msg ", replyMSG);
-                                try {
-                                    if (msg.key.remoteJid) await this.sendGroupMessage(
-                                        msg!.key!.remoteJid,
-                                        replyMSG
-                                    );
-                                } catch (error) {
-                                    console.error(error);
+                        // jika group id
+                        const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
+                        if (msg.key.remoteJid?.includes("@g.us")) {
+                            try {
+                                if (text === "!groupid") {
+                                    const slid = "====="
+                                    const replyMSG = `${slid}\nGroupID: ${msg.key.remoteJid}\n${slid}`;
+                                    console.log("reply msg ", replyMSG);
+                                    try {
+                                        if (msg.key.remoteJid) await this.sendGroupMessage(
+                                            msg!.key!.remoteJid,
+                                            replyMSG
+                                        );
+                                    } catch (error) {
+                                        console.error(error);
+                                    }
                                 }
+                                this.addingToMsgDatabase(msg, true)
+                            } catch (error) {
+                                console.error(error);
                             }
-                        } catch (error) {
-                            console.error(error);
+                        } else {
+                            try {
+                                if (text === "!groupid") {
+                                    if (msg.key.remoteJid) await this.client.sendText(
+                                        msg.key.remoteJid,
+                                        "You are not in a group, but this is your id " + msg.key.remoteJid
+                                    );
+                                }
+                                this.addingToMsgDatabase(msg, false)
+                            } catch (error) {
+                                console.error(error);
+                            }
                         }
                     }
                 }
@@ -159,6 +181,21 @@ export default class WhatsApp {
         });
         // const r = {groupID, text}
         return r;
+    }
+
+    async addingToMsgDatabase(msg: WAMessage, isGroup: boolean) {
+        const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
+        await this.prisma.message.create({
+            data: {
+                id_msg: msg.key.id!,
+                remote_jid: msg.key.remoteJid!,
+                msg_json: JSON.stringify(msg),
+                from_me: (msg.key.fromMe ? true : false),
+                push_name: msg.pushName ?? "",
+                message_text: text ?? "",
+                is_group: isGroup
+            }
+        })
     }
 
     async getQrCode() {
