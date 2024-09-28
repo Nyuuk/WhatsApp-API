@@ -4,6 +4,10 @@ bvvip/
 # all of js file
 **.js
 
+# db
+**.db
+prisma/migrations
+
 # Logs
 logs
 *.log
