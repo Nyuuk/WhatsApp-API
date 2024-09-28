@@ -1,0 +1,9 @@
+POST http://localhost:3000/api/send-message
+Content-Type: application/json
+X-Api-Key: HELLOWORLD
+X-Api-Secret: 461a5974dcbbc1ab78ffab4f07c7bd36b059c31e0df5f14b4c10ea0782ad8de3
+
+{
+    "number": "6281382358026",
+    "text": "dari rest client"
+}

@@ -1,0 +1,7 @@
+GET http://localhost:3000/api/get-messages?mark=false
+Content-Type: application/json
+X-Api-Key: HELLOWORLD
+# ini untuk mark true
+# X-Api-Secret: ec7c67fbea00abb6a40ebcbf8f448629381e10d8513593d4682137485911e5bf
+# ini untuk mark false
+X-Api-Secret: bab467f229466687436bfc9035dde4fbb753ec0d184ad163830181788695a7c6
