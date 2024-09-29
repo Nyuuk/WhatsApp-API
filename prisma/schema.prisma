@@ -30,3 +30,30 @@ model User {
   username String @unique
   password String
 }
+
+model QueueMessages {
+  id            Int       @id @default(autoincrement())
+  number        String
+  text          String
+  last_response String?
+  status        Boolean   @default(false)
+  count_retry   Int       @default(0)
+  max_retry     Int       @default(3)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
+  is_deleted    DateTime?
+}
+
+model ScheduledMessages {
+  id     Int     @id @default(autoincrement())
+  number String
+  text   String
+  last_response String?
+  status Boolean @default(false)
+  count_retry Int @default(0)
+  max_retry Int @default(3)
+  send_at DateTime
+  created_at  DateTime  @default(now())
+  updated_at  DateTime?
+  is_deleted  DateTime?
+}

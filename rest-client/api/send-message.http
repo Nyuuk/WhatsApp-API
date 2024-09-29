@@ -7,3 +7,28 @@ X-Api-Secret: 461a5974dcbbc1ab78ffab4f07c7bd36b059c31e0df5f14b4c10ea0782ad8de3
     "number": "6281382358026",
     "text": "dari rest client"
 }
+
+###
+
+POST http://localhost:3000/api/send-message-queue
+Content-Type: application/json
+X-Api-Key: HELLOWORLD
+X-Api-Secret: 49647abca02744fcd8a35b1e3f1f170e8ad38a33b093986d797eaeeebeb7159c
+
+{
+    "number": "6285156803524@s.whatsapp.net",
+    "text": "dari queue message"
+}
+
+###
+
+POST http://localhost:3000/api/send-message-schedule
+Content-Type: application/json
+X-Api-Key: HELLOWORLD
+X-Api-Secret: f938a55b31a5d40e180e99d3b19f658e62e4f59a920138156887c16aa572fd21
+
+{
+    "number": "6285156803524@s.whatsapp.net",
+    "text": "schedule at 2024-09-29 09:10:00",
+    "date": "2024-09-29 09:10:00"
+}

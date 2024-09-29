@@ -198,6 +198,113 @@ export default class WhatsApp {
         })
     }
 
+    async addingQueueMessage(number: string, text: string) {
+        const newMessage = await this.prisma.queueMessages.create({
+            data: {
+                number: number,
+                text: text
+            }
+        })
+        return newMessage
+    }
+
+    async addingScheduleMessage(number: string, text: string, date: Date) {
+        const newMessage = await this.prisma.scheduledMessages.create({
+            data: {
+                number: number,
+                text: text,
+                send_at: date
+            }
+        })
+        return newMessage
+    }
+
+    async executeScheduleMessage() {
+        while (true) {
+            // console.log("executeScheduleMessage")
+            const messages = await this.prisma.scheduledMessages.findMany({
+                where: {
+                    status: false,
+                    
+                }
+            })
+            const filterMessages = messages.filter((msg) => {
+                return msg.count_retry < msg.max_retry && new Date(msg.send_at) < new Date()
+            })
+            for (const msg of filterMessages) {
+                let r;
+                try {
+                    r = await this.sendGroupMessage(msg.number, msg.text)
+                    await this.prisma.scheduledMessages.update({
+                        where: {
+                            id: msg.id
+                        },
+                        data: {
+                            status: true,
+                            count_retry: msg.count_retry + 1,
+                            last_response: JSON.stringify(r),
+                            updated_at: new Date()
+                        }
+                    })
+                } catch (error) {
+                    await this.prisma.scheduledMessages.update({
+                        where: {
+                            id: msg.id
+                        },
+                        data: {
+                            count_retry: msg.count_retry + 1,
+                            last_response: JSON.stringify(error),
+                            updated_at: new Date()
+                        }
+                    })
+                }
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+    }
+
+    async executeQueueMessage() {
+        while (true) {
+            // console.log("executeQueueMessage")
+            const messages = await this.prisma.queueMessages.findMany({
+                where: {
+                    status: false
+                }
+            })
+            const filterMessages = messages.filter((msg) => {
+                return msg.count_retry < msg.max_retry
+            })
+            for (const msg of filterMessages) {
+                try {
+                    const r = await this.sendGroupMessage(msg.number, msg.text)
+                    await this.prisma.queueMessages.update({
+                        where: {
+                            id: msg.id
+                        },
+                        data: {
+                            status: true,
+                            count_retry: msg.count_retry + 1,
+                            last_response: JSON.stringify(r),
+                            updated_at: new Date()
+                        }
+                    })
+                } catch (error) {
+                    await this.prisma.queueMessages.update({
+                        where: {
+                            id: msg.id
+                        },
+                        data: {
+                            count_retry: msg.count_retry + 1,
+                            last_response: JSON.stringify(error),
+                            updated_at: new Date()
+                        }
+                    })
+                }
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+    }
+
     async getQrCode() {
         return this.qrCode
     }

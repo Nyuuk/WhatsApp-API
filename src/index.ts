@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { dataMessageInterface } from "./define.md";
 import ResponseHelper from "./helpers/ResponseHelper";
 import multer from "multer";
+import moment from "moment-timezone";
 
 dotenv.config();
 
@@ -114,6 +115,40 @@ api.post("/send-message", async (req: express.Request, res) => {
     ResponseHelper(res, r)
 });
 
+api.post('/send-message-queue', async (req: express.Request, res) => {
+    const json = req.body;
+    if (!json.text) {
+        ResponseHelper(res, 'text is required', 404)
+        return
+    }
+    if (!json.number) {
+        ResponseHelper(res, 'number is invalid & start with 62', 404)
+        return
+    }
+    const r = await WA.addingQueueMessage(json.number, json.text);
+    ResponseHelper(res, r)
+})
+
+api.post('/send-message-schedule', async (req: express.Request, res) => {
+    const json = req.body;
+    if (!json.text) {
+        ResponseHelper(res, 'text is required', 404)
+        return
+    }
+    if (!json.number) {
+        ResponseHelper(res, 'number is invalid & start with 62', 404)
+        return
+    }
+    if (!json.date) {
+        ResponseHelper(res, 'date is required', 404)
+        return
+    }
+
+    const timeAsiaJakarta = moment.tz(json.date, "Asia/Jakarta").format();
+    const r = await WA.addingScheduleMessage(json.number, json.text, new Date(timeAsiaJakarta));
+    ResponseHelper(res, r)
+})
+
 api.post("/send-message-group", async (req: express.Request, res) => {
     const json = req.body;
     if (!json.text) {
@@ -199,4 +234,8 @@ app.use("/api", api);
 app.listen(process.env.APP_PORT, async () => {
     console.log("Listening on port 3000");
     WA.makeConnection();
+    setTimeout(() => {
+        WA.executeQueueMessage();
+        WA.executeScheduleMessage();
+    }, 5000)
 });
