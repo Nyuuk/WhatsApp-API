@@ -174,6 +174,13 @@ export default class WhatsApp {
     }
 
     async sendGroupMessage(number: string, text: string) {
+        await this.client.presenceSubscribe(number)
+        await new Promise((resolve) => {setTimeout(resolve, 500)})
+        
+        await this.client.sendPresenceUpdate('composing', number)
+        await new Promise((resolve) => {setTimeout(resolve, 2000)})
+
+        await this.client.sendPresenceUpdate('paused', number)
         // const groupID = number + "@g.us";
         // console.log("sendGroupMessage", number, text);
         const r = await this.client.sendMessage(number, {
