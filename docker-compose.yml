@@ -8,4 +8,5 @@ services:
     volumes:
       - ./bvvip:/app/bvvip
       - ./database:/app/database
+      - ./prisma:/app/prisma
     restart: always
