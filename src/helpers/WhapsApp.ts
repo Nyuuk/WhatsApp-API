@@ -15,6 +15,7 @@ import logger from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
 import readline from "readline";
 import { PrismaClient } from "@prisma/client";
+import myMethod, { generalMethod } from "./MethodReply";
 
 dotenv.config()
 
@@ -119,40 +120,41 @@ export default class WhatsApp {
                 if (upsert.type === "notify") {
                     for (const msg of upsert.messages) {
                         console.log("msg", msg);
+                        this.executeAutoReply(msg);
                         // jika group id
-                        const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
-                        if (msg.key.remoteJid?.includes("@g.us")) {
-                            try {
-                                if (text === "!groupid") {
-                                    const slid = "====="
-                                    const replyMSG = `${slid}\nGroupID: ${msg.key.remoteJid}\n${slid}`;
-                                    console.log("reply msg ", replyMSG);
-                                    try {
-                                        if (msg.key.remoteJid) await this.sendGroupMessage(
-                                            msg!.key!.remoteJid,
-                                            replyMSG
-                                        );
-                                    } catch (error) {
-                                        console.error(error);
-                                    }
-                                }
-                                this.addingToMsgDatabase(msg, true)
-                            } catch (error) {
-                                console.error(error);
-                            }
-                        } else {
-                            try {
-                                if (text === "!groupid") {
-                                    if (msg.key.remoteJid) await this.client.sendText(
-                                        msg.key.remoteJid,
-                                        "You are not in a group, but this is your id " + msg.key.remoteJid
-                                    );
-                                }
-                                this.addingToMsgDatabase(msg, false)
-                            } catch (error) {
-                                console.error(error);
-                            }
-                        }
+                        // const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
+                        // if (msg.key.remoteJid?.includes("@g.us")) {
+                        //     try {
+                        //         if (text === "!groupid") {
+                        //             const slid = "====="
+                        //             const replyMSG = `${slid}\nGroupID: ${msg.key.remoteJid}\n${slid}`;
+                        //             console.log("reply msg ", replyMSG);
+                        //             try {
+                        //                 if (msg.key.remoteJid) await this.sendGroupMessage(
+                        //                     msg!.key!.remoteJid,
+                        //                     replyMSG
+                        //                 );
+                        //             } catch (error) {
+                        //                 console.error(error);
+                        //             }
+                        //         }
+                        //         this.addingToMsgDatabase(msg, true)
+                        //     } catch (error) {
+                        //         console.error(error);
+                        //     }
+                        // } else {
+                        //     try {
+                        //         if (text === "!groupid") {
+                        //             if (msg.key.remoteJid) await this.client.sendText(
+                        //                 msg.key.remoteJid,
+                        //                 "You are not in a group, but this is your id " + msg.key.remoteJid
+                        //             );
+                        //         }
+                        //         this.addingToMsgDatabase(msg, false)
+                        //     } catch (error) {
+                        //         console.error(error);
+                        //     }
+                        // }
                     }
                 }
             }
@@ -175,10 +177,10 @@ export default class WhatsApp {
 
     async sendGroupMessage(number: string, text: string) {
         await this.client.presenceSubscribe(number)
-        await new Promise((resolve) => {setTimeout(resolve, 500)})
-        
+        await new Promise((resolve) => { setTimeout(resolve, 500) })
+
         await this.client.sendPresenceUpdate('composing', number)
-        await new Promise((resolve) => {setTimeout(resolve, 2000)})
+        await new Promise((resolve) => { setTimeout(resolve, 2000) })
 
         await this.client.sendPresenceUpdate('paused', number)
         // const groupID = number + "@g.us";
@@ -232,7 +234,7 @@ export default class WhatsApp {
             const messages = await this.prisma.scheduledMessages.findMany({
                 where: {
                     status: false,
-                    
+
                 }
             })
             const filterMessages = messages.filter((msg) => {
@@ -310,6 +312,36 @@ export default class WhatsApp {
             }
             await new Promise(resolve => setTimeout(resolve, 1000))
         }
+    }
+
+    async executeAutoReply(msg: WAMessage) {
+        const autoReplyMessage = await this.prisma.autoReplyMessage.findMany();
+        const allPrefixAutoReply = autoReplyMessage.map((msg) => {
+            return msg.prefix
+        })
+
+        const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
+
+        if (allPrefixAutoReply.includes(text)) {
+            const indexPrefix = allPrefixAutoReply.indexOf(text)
+            const autoReplyOpt = autoReplyMessage[indexPrefix]
+            const typeAutoReply = await this.prisma.typeAutoReplyMessage.findUnique({
+                where: {
+                    id: autoReplyOpt.type_id
+                }
+            })
+
+            if (typeAutoReply && typeAutoReply.option_as === "text") {
+                await generalMethod.sendText(this.client, msg.key.remoteJid!, autoReplyOpt.option)
+            } else if (typeAutoReply && typeAutoReply.option_as === "function") {
+                if (typeof myMethod[autoReplyOpt.option] === 'function') {
+                    await myMethod[autoReplyOpt.option](this.client, msg)
+                } else {
+                    console.error(`Function ${autoReplyOpt.option} not found`)
+                }
+            }
+        }
+
     }
 
     async getQrCode() {

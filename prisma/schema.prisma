@@ -45,15 +45,33 @@ model QueueMessages {
 }
 
 model ScheduledMessages {
-  id     Int     @id @default(autoincrement())
-  number String
-  text   String
+  id            Int       @id @default(autoincrement())
+  number        String
+  text          String
   last_response String?
-  status Boolean @default(false)
-  count_retry Int @default(0)
-  max_retry Int @default(3)
-  send_at DateTime
-  created_at  DateTime  @default(now())
-  updated_at  DateTime?
-  is_deleted  DateTime?
+  status        Boolean   @default(false)
+  count_retry   Int       @default(0)
+  max_retry     Int       @default(3)
+  send_at       DateTime
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
+  is_deleted    DateTime?
+}
+
+model AutoReplyMessage {
+  id      Int                  @id @default(autoincrement())
+  type_id Int
+  prefix  String
+  option  String
+  description String?
+  type    TypeAutoReplyMessage @relation("AutoReplyMessage", fields: [type_id], references: [id])
+}
+
+model TypeAutoReplyMessage {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  description        String
+  prefix_wildcard    Boolean
+  option_as          String // as string, function
+  auto_reply_message AutoReplyMessage[] @relation("AutoReplyMessage")
 }
