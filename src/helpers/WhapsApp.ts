@@ -248,7 +248,7 @@ export default class WhatsApp {
 
                 const gracePeriod = 1000;
 
-                console.log(nextExecutionTimeStamp <= nowTimeStamp, nextExecution, now)
+                // console.log(nextExecutionTimeStamp <= nowTimeStamp, nextExecution, now)
 
                 return nextExecutionTimeStamp <= nowTimeStamp + gracePeriod
 
@@ -264,7 +264,7 @@ export default class WhatsApp {
                 // }
                 // return generalMethod.cronParser(msg.cron) <= new Date()
             })
-            console.log('filter message', filterMessages)
+            // console.log('filter message', filterMessages)
             for (const msg of filterMessages) {
                 let r;
                 try {
