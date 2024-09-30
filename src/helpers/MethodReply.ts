@@ -32,10 +32,15 @@ const myMethod: MyMethod = {
             console.log("addPrefix", typeName, option)
             const re = await generalMethod.addPrefix(typeName, option, prefix, prisma)
             await generalMethod.sendText(client, jid!, re)
+            return
         } else if (command === "!addprefix" && splitText.length < 4) {
             const replyMSG = "Usage: !addprefix <type> <prefix> <option>"
             await generalMethod.sendText(client, jid!, replyMSG)
+            return
         }
+        console.log("not recognized add prefix", command, typeName, option)
+        await generalMethod.sendText(client, jid!, "Not recognized, i don't know what to do")
+        return
     },
     listAllPrefixCommand: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
         const jid = msg.key.remoteJid
