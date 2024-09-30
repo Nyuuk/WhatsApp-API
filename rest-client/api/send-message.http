@@ -29,6 +29,6 @@ X-Api-Secret: f938a55b31a5d40e180e99d3b19f658e62e4f59a920138156887c16aa572fd21
 
 {
     "number": "6285156803524@s.whatsapp.net",
-    "text": "schedule at 2024-09-29 09:10:00",
-    "date": "2024-09-29 09:10:00"
+    "text": "schedule at 2024-10-01 04:05:00",
+    "cron": "5 4 * * *"
 }
