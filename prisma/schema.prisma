@@ -74,7 +74,7 @@ model AutoReplyMessage {
 
 model TypeAutoReplyMessage {
   id                 Int                @id @default(autoincrement())
-  name               String
+  name               String             @unique
   description        String
   prefix_wildcard    Boolean
   option_as          String // as string, function

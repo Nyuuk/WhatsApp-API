@@ -24,14 +24,50 @@ const myMethod: MyMethod = {
         const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
 
         const splitText = text.split(" ")
-        if (splitText[0] === "!addprefix") {
-            console.log("addPrefix", splitText[1])
-            const typePrefix = await prisma?.typeAutoReplyMessage.findMany({
-                where: {
-                    name: splitText[1]
-                }
-            })
+        const command = splitText[0]
+        const typeName = splitText[1]
+        const prefix = splitText[2]
+        const option = splitText.slice(3).join(" ")
+        if (command === "!addprefix" && splitText.length >= 4) {
+            console.log("addPrefix", typeName, option)
+            const re = await generalMethod.addPrefix(typeName, option, prefix, prisma)
+            await generalMethod.sendText(client, jid!, re)
+        } else if (command === "!addprefix" && splitText.length < 4) {
+            const replyMSG = "Usage: !addprefix <type> <prefix> <option>"
+            await generalMethod.sendText(client, jid!, replyMSG)
         }
+    },
+    listAllPrefixCommand: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
+        const jid = msg.key.remoteJid
+        const dataPrefix = await generalMethod.listAllPrefixCommand(prisma)
+        let replyMSG = "----\nList All Prefix:\n"
+        if (dataPrefix && dataPrefix.length > 0) {
+            for (let i = 0; i < dataPrefix.length; i++) {
+                const typePrefix = await prisma?.typeAutoReplyMessage.findUnique({
+                    where: {
+                        id: dataPrefix[i].type_id
+                    }
+                })
+                replyMSG += `Type: ${typePrefix?.name}\nPrefix: ${dataPrefix[i].prefix}\nOption: ${dataPrefix[i].option}\nDescription: ${dataPrefix[i].description}\n\n`
+            }
+        } else {
+            replyMSG = "No data found\n\n"
+        }
+        replyMSG += "----"
+        await generalMethod.sendText(client, jid!, replyMSG)
+    },
+    listAllTypeCommand: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
+        const jid = msg.key.remoteJid
+        const dataPrefix = await generalMethod.listAllTypeCommand(prisma)
+        let replyMSG = "----\nList All Type:\n"
+        if (dataPrefix && dataPrefix.length > 0) {
+            for (let i = 0; i < dataPrefix.length; i++) {
+                replyMSG += `Type: ${dataPrefix[i].name}\n\n`
+            }
+        } else {
+            replyMSG = "No data found"
+        }
+        await generalMethod.sendText(client, jid!, replyMSG)
     }
 }
 const generalMethod = {
@@ -57,6 +93,60 @@ const generalMethod = {
         const interval = parseExpression(cron, option)
 
         return interval
+    },
+    addPrefix: async (typeName: string, option: string, prefix: string, prisma?: PrismaClient) => {
+        const typePrefix = await prisma?.typeAutoReplyMessage.findUnique({
+            where: {
+                name: typeName
+            }
+        })
+
+        if (typePrefix) {
+            await prisma?.autoReplyMessage.create({
+                data: {
+                    prefix: prefix,
+                    type_id: typePrefix.id,
+                    option: option
+                }
+            })
+            // validasi apakah di my method terdapat option jika typePrefix dengan id optios_as function
+            if (typePrefix.option_as === "function" && typeof myMethod[option] !== 'function') {
+                return `Sorry your option ${option} not found`
+            }
+            return `Success creating new command prefix\n\n-----\nprefix: ${prefix}\ntype: ${typeName}\noption: ${option}\n\n-----\n\n\`!listall\` to see all command`
+        } else {
+            return `Sorry your type name ${typeName} not found`
+        }
+    },
+    deletePrifix: async (prefix: string, prisma?: PrismaClient) => {
+        const deletePrefix = await prisma?.autoReplyMessage.updateMany({
+            where: {
+                prefix: prefix
+            }, data: {
+                deleted_at: new Date()
+            }
+        })
+        if (deletePrefix) {
+            return `Success delete command prefix ${prefix}\nTotal deleted: ${deletePrefix.count}\n\n-----\n\n\`!listall\` to see all command`
+        } else {
+            return `Sorry your command prefix ${prefix} not found`
+        }
+    },
+    listAllPrefixCommand: async (prisma?: PrismaClient) => {
+        const autoReplyMessage = await prisma?.autoReplyMessage.findMany({
+            where: {
+                deleted_at: null
+            }
+        })
+        return autoReplyMessage
+    },
+    listAllTypeCommand: async (prisma?: PrismaClient) => {
+        const typeAutoReplyMessage = await prisma?.typeAutoReplyMessage.findMany({
+            where: {
+                deleted_at: null
+            }
+        })
+        return typeAutoReplyMessage
     }
 }
 
