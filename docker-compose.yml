@@ -4,9 +4,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3123:3123"
+      - "3123:3000"
     volumes:
       - ./bvvip:/app/bvvip
-      - ./database:/app/database
-      - ./prisma:/app/prisma
+      # - ./database:/app/database
+      # - ./prisma:/app/prisma
     restart: always

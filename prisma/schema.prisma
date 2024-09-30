@@ -11,7 +11,7 @@ generator client {
 datasource db {
   provider = "postgres"
   // url      = "file:../database/data.db"
-  url      = "postgresql://whatsapp-adnan:whatsapp-adnan@pg.icc.private:5432/adnan-whatsapp"
+  url      = env("DATABASE_URL")
 }
 
 model Message {
