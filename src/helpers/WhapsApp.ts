@@ -347,8 +347,9 @@ export default class WhatsApp {
         })
 
         const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
+        const textSplit = text.split(" ")
 
-        if (allPrefixAutoReply.includes(text)) {
+        if (allPrefixAutoReply.includes(textSplit[0])) {
             const indexPrefix = allPrefixAutoReply.indexOf(text)
             const autoReplyOpt = autoReplyMessage[indexPrefix]
             const typeAutoReply = await this.prisma.typeAutoReplyMessage.findUnique({
