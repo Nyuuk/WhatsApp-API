@@ -40,7 +40,7 @@ const myMethod: MyMethod = {
     listAllPrefixCommand: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
         const jid = msg.key.remoteJid
         const dataPrefix = await generalMethod.listAllPrefixCommand(prisma)
-        let replyMSG = "----\nList All Prefix:\n"
+        let replyMSG = ""
         if (dataPrefix && dataPrefix.length > 0) {
             for (let i = 0; i < dataPrefix.length; i++) {
                 const typePrefix = await prisma?.typeAutoReplyMessage.findUnique({
@@ -48,30 +48,34 @@ const myMethod: MyMethod = {
                         id: dataPrefix[i].type_id
                     }
                 })
-                replyMSG += `Type: ${typePrefix?.name}\nPrefix: ${dataPrefix[i].prefix}\nOption: ${dataPrefix[i].option}\nDescription: ${dataPrefix[i].description}\n\n`
+                replyMSG += `Type: **${typePrefix?.name}**\nPrefix: **${dataPrefix[i].prefix}**\nOption: **${dataPrefix[i].option}**\nDescription: **${dataPrefix[i].description}**\n\n`
             }
         } else {
             replyMSG = "No data found\n\n"
         }
-        replyMSG += "----"
-        await generalMethod.sendText(client, jid!, replyMSG)
+        const text = generalMethod.beautyTextList("List All Prefix", replyMSG)
+        await generalMethod.sendText(client, jid!, text)
     },
     listAllTypeCommand: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
         const jid = msg.key.remoteJid
         const dataPrefix = await generalMethod.listAllTypeCommand(prisma)
-        let replyMSG = "----\nList All Type:\n"
+        let replyMSG = ""
         if (dataPrefix && dataPrefix.length > 0) {
             for (let i = 0; i < dataPrefix.length; i++) {
-                replyMSG += `Type: ${dataPrefix[i].name}\n\n`
+                replyMSG += `Type: **${dataPrefix[i].name}**\nDescription: **${dataPrefix[i].description}**\nPrefix Wildcard: **${dataPrefix[i].prefix_wildcard}**\nOption As: **${dataPrefix[i].option_as}**\n\n`
             }
         } else {
-            replyMSG = "No data found\n\n"
+            replyMSG = "No data found\"
         }
-        replyMSG += "----"
-        await generalMethod.sendText(client, jid!, replyMSG)
+        const text = generalMethod.beautyTextList("List All Type", replyMSG)
+        await generalMethod.sendText(client, jid!, text)
     }
 }
 const generalMethod = {
+    beautyTextList: (title: string, text: string) => {
+        const t = `**${title}**\n----\n\n${text}\n\n----`
+        return t
+    },
     sendText: async (client: WASocket, number: string, text: string) => {
         await client.presenceSubscribe(number)
         await new Promise((resolve) => { setTimeout(resolve, 500) })
