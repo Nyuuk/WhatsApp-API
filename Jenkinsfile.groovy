@@ -53,7 +53,7 @@ pipeline {
         steps {
             // sh 'ssh arch@docker.icc.private "cd whatsapp-api; docker compose up -d --build;"'
             commandSsh('docker compose up -d --build;')
-            commandSsh("docker compose exec app npm run prisma:migrate")
+            // commandSsh("docker compose exec app npm run prisma:migrate")
             commandSsh("docker compose exec app npm run prisma:generate")
         }
       }
