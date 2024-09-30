@@ -361,7 +361,7 @@ export default class WhatsApp {
                 await generalMethod.sendText(this.client, msg.key.remoteJid!, autoReplyOpt.option)
             } else if (typeAutoReply && typeAutoReply.option_as === "function") {
                 if (typeof myMethod[autoReplyOpt.option] === 'function') {
-                    await myMethod[autoReplyOpt.option](this.client, msg)
+                    await myMethod[autoReplyOpt.option](this.client, msg, this.prisma)
                 } else {
                     console.error(`Function ${autoReplyOpt.option} not found`)
                 }

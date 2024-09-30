@@ -65,8 +65,9 @@ const myMethod: MyMethod = {
                 replyMSG += `Type: ${dataPrefix[i].name}\n\n`
             }
         } else {
-            replyMSG = "No data found"
+            replyMSG = "No data found\n\n"
         }
+        replyMSG += "----"
         await generalMethod.sendText(client, jid!, replyMSG)
     }
 }
