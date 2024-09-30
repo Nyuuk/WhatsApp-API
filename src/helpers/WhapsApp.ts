@@ -16,6 +16,7 @@ import NodeCache from "node-cache";
 import readline from "readline";
 import { PrismaClient } from "@prisma/client";
 import myMethod, { generalMethod } from "./MethodReply";
+import { parseExpression } from "cron-parser";
 
 dotenv.config()
 
@@ -217,12 +218,12 @@ export default class WhatsApp {
         return newMessage
     }
 
-    async addingScheduleMessage(number: string, text: string, date: Date) {
+    async addingScheduleMessage(number: string, text: string, cron: string) {
         const newMessage = await this.prisma.scheduledMessages.create({
             data: {
                 number: number,
                 text: text,
-                send_at: date
+                cron: cron
             }
         })
         return newMessage
@@ -233,13 +234,37 @@ export default class WhatsApp {
             // console.log("executeScheduleMessage")
             const messages = await this.prisma.scheduledMessages.findMany({
                 where: {
-                    status: false,
-
+                    // status: false,
+                    deleted_at: null
                 }
             })
             const filterMessages = messages.filter((msg) => {
-                return msg.count_retry < msg.max_retry && new Date(msg.send_at) < new Date()
+                const lastSuccess = msg.last_success
+                const cron = generalMethod.cronParser(msg.cron, lastSuccess ? lastSuccess : new Date())
+                const nextExecution = cron.next().toDate()
+                const nextExecutionTimeStamp = nextExecution.getTime()
+                const now = new Date()
+                const nowTimeStamp = now.getTime()
+
+                const gracePeriod = 1000;
+
+                console.log(nextExecutionTimeStamp <= nowTimeStamp, nextExecution, now)
+
+                return nextExecutionTimeStamp <= nowTimeStamp + gracePeriod
+
+                // if (!lastSuccess) {
+                //     console.log('null cron', generalMethod.cronParser(msg.cron), new Date())
+                //     console.log('last success null', nextExecution <= now)
+                //     return nextExecution <= now
+                // }
+                // if (lastSuccess) {
+                //     console.log('not null cron', generalMethod.cronParser(msg.cron), new Date())
+                //     console.log('last success not null', nextExecution > now && nextExecution >= lastSuccess)
+                //     return nextExecution > now && nextExecution >= lastSuccess
+                // }
+                // return generalMethod.cronParser(msg.cron) <= new Date()
             })
+            console.log('filter message', filterMessages)
             for (const msg of filterMessages) {
                 let r;
                 try {
@@ -249,8 +274,9 @@ export default class WhatsApp {
                             id: msg.id
                         },
                         data: {
-                            status: true,
-                            count_retry: msg.count_retry + 1,
+                            // status: true,
+                            // count_retry: msg.count_retry + 1,
+                            last_success: new Date(),
                             last_response: JSON.stringify(r),
                             updated_at: new Date()
                         }
@@ -261,7 +287,7 @@ export default class WhatsApp {
                             id: msg.id
                         },
                         data: {
-                            count_retry: msg.count_retry + 1,
+                            // count_retry: msg.count_retry + 1,
                             last_response: JSON.stringify(error),
                             updated_at: new Date()
                         }

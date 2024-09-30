@@ -9,12 +9,13 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:../database/data.db"
+  provider = "postgres"
+  // url      = "file:../database/data.db"
+  url      = "postgresql://whatsapp-adnan:whatsapp-adnan@pg.icc.private:5432/adnan-whatsapp"
 }
 
 model Message {
-  id           Int     @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   id_msg       String
   msg_json     String
   remote_jid   String
@@ -22,13 +23,15 @@ model Message {
   push_name    String
   message_text String
   is_group     Boolean
-  is_read      Boolean @default(false)
+  is_read      Boolean   @default(false)
+  deleted_at   DateTime?
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
+  id         Int       @id @default(autoincrement())
+  username   String    @unique
+  password   String
+  deleted_at DateTime?
 }
 
 model QueueMessages {
@@ -41,7 +44,7 @@ model QueueMessages {
   max_retry     Int       @default(3)
   created_at    DateTime  @default(now())
   updated_at    DateTime?
-  is_deleted    DateTime?
+  deleted_at    DateTime?
 }
 
 model ScheduledMessages {
@@ -49,22 +52,24 @@ model ScheduledMessages {
   number        String
   text          String
   last_response String?
-  status        Boolean   @default(false)
-  count_retry   Int       @default(0)
-  max_retry     Int       @default(3)
-  send_at       DateTime
+  // status        Boolean   @default(false)
+  // count_retry   Int       @default(0)
+  // max_retry     Int       @default(3)
+  cron          String
+  last_success  DateTime?
   created_at    DateTime  @default(now())
   updated_at    DateTime?
-  is_deleted    DateTime?
+  deleted_at    DateTime?
 }
 
 model AutoReplyMessage {
-  id      Int                  @id @default(autoincrement())
-  type_id Int
-  prefix  String
-  option  String
+  id          Int                  @id @default(autoincrement())
+  type_id     Int
+  prefix      String
+  option      String
   description String?
-  type    TypeAutoReplyMessage @relation("AutoReplyMessage", fields: [type_id], references: [id])
+  type        TypeAutoReplyMessage @relation("AutoReplyMessage", fields: [type_id], references: [id])
+  deleted_at  DateTime?
 }
 
 model TypeAutoReplyMessage {
@@ -74,4 +79,5 @@ model TypeAutoReplyMessage {
   prefix_wildcard    Boolean
   option_as          String // as string, function
   auto_reply_message AutoReplyMessage[] @relation("AutoReplyMessage")
+  deleted_at         DateTime?
 }

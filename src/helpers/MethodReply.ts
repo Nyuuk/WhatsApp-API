@@ -1,8 +1,10 @@
+import { PrismaClient } from "@prisma/client";
 import { WAMessage, WASocket } from "@whiskeysockets/baileys";
+import { CronExpression, parseExpression } from "cron-parser";
 
 interface MyMethod {
     // sendText: (client: WASocket, number: string, text: string) => Promise<void>;
-    [key: string]: (client: WASocket, msg: WAMessage) => Promise<void>; // Index signature
+    [key: string]: (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => Promise<void>; // Index signature
 }
 
 const myMethod: MyMethod = {
@@ -17,6 +19,20 @@ const myMethod: MyMethod = {
             await generalMethod.sendText(client, jid, replyMSG)
         }
     },
+    addPrefix: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
+        const jid = msg.key.remoteJid
+        const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
+
+        const splitText = text.split(" ")
+        if (splitText[0] === "!addprefix") {
+            console.log("addPrefix", splitText[1])
+            const typePrefix = await prisma?.typeAutoReplyMessage.findMany({
+                where: {
+                    name: splitText[1]
+                }
+            })
+        }
+    }
 }
 const generalMethod = {
     sendText: async (client: WASocket, number: string, text: string) => {
@@ -32,6 +48,15 @@ const generalMethod = {
         await client.sendMessage(number, {
             text: text,
         });
+    },
+    cronParser: (cron: string, lastSuccess: Date): CronExpression => {
+        const option = {
+            currentDate: lastSuccess,
+            tz: "Asia/Jakarta"
+        }
+        const interval = parseExpression(cron, option)
+
+        return interval
     }
 }
 

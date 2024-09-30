@@ -139,13 +139,18 @@ api.post('/send-message-schedule', async (req: express.Request, res) => {
         ResponseHelper(res, 'number is invalid & start with 62', 404)
         return
     }
-    if (!json.date) {
-        ResponseHelper(res, 'date is required', 404)
+    if (!json.cron) {
+        if (json.cron.length < 5) {
+            ResponseHelper(res, 'cron is invalid', 404)
+            return
+        }
+        // validasi format cron
+        ResponseHelper(res, 'cron is required', 404)
         return
     }
 
-    const timeAsiaJakarta = moment.tz(json.date, "Asia/Jakarta").format();
-    const r = await WA.addingScheduleMessage(json.number, json.text, new Date(timeAsiaJakarta));
+    // const timeAsiaJakarta = moment.tz(json.date, "Asia/Jakarta").format();
+    const r = await WA.addingScheduleMessage(json.number, json.text, json.cron);
     ResponseHelper(res, r)
 })
 
