@@ -65,7 +65,7 @@ const myMethod: MyMethod = {
                 replyMSG += `Type: **${dataPrefix[i].name}**\nDescription: **${dataPrefix[i].description}**\nPrefix Wildcard: **${dataPrefix[i].prefix_wildcard}**\nOption As: **${dataPrefix[i].option_as}**\n\n`
             }
         } else {
-            replyMSG = "No data found\"
+            replyMSG = "No data found"
         }
         const text = generalMethod.beautyTextList("List All Type", replyMSG)
         await generalMethod.sendText(client, jid!, text)
