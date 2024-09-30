@@ -48,7 +48,8 @@ const myMethod: MyMethod = {
                         id: dataPrefix[i].type_id
                     }
                 })
-                replyMSG += `Type: **${typePrefix?.name}**\nPrefix: **${dataPrefix[i].prefix}**\nOption: **${dataPrefix[i].option}**\nDescription: **${dataPrefix[i].description}**\n\n`
+                const newLine = i < dataPrefix.length - 1 ? "\n\n" : ""
+                replyMSG += `Type: *${typePrefix?.name}*\nPrefix: *${dataPrefix[i].prefix}*\nOption: *${dataPrefix[i].option}*\nDescription: *${dataPrefix[i].description}*${newLine}`
             }
         } else {
             replyMSG = "No data found\n\n"
@@ -62,7 +63,8 @@ const myMethod: MyMethod = {
         let replyMSG = ""
         if (dataPrefix && dataPrefix.length > 0) {
             for (let i = 0; i < dataPrefix.length; i++) {
-                replyMSG += `Type: **${dataPrefix[i].name}**\nDescription: **${dataPrefix[i].description}**\nPrefix Wildcard: **${dataPrefix[i].prefix_wildcard}**\nOption As: **${dataPrefix[i].option_as}**\n\n`
+                const newLine = i < dataPrefix.length - 1 ? "\n\n" : ""
+                replyMSG += `Type: *${dataPrefix[i].name}*\nDescription: *${dataPrefix[i].description}*\nPrefix Wildcard: *${dataPrefix[i].prefix_wildcard}*\nOption As: *${dataPrefix[i].option_as}*${newLine}`
             }
         } else {
             replyMSG = "No data found"
