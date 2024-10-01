@@ -14,7 +14,7 @@ import { Boom } from "@hapi/boom";
 import logger from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
 import readline from "readline";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, TypeAutoReplyMessage } from "@prisma/client";
 import myMethod, { generalMethod } from "./MethodReply";
 import { parseExpression } from "cron-parser";
 
@@ -348,15 +348,19 @@ export default class WhatsApp {
 
         const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
         const textSplit = text.split(" ")
+        const command = textSplit[0]
 
-        if (allPrefixAutoReply.includes(textSplit[0])) {
-            const indexPrefix = allPrefixAutoReply.indexOf(text)
+        if (allPrefixAutoReply.includes(command)) {
+            const indexPrefix = allPrefixAutoReply.indexOf(command)
             const autoReplyOpt = autoReplyMessage[indexPrefix]
-            const typeAutoReply = await this.prisma.typeAutoReplyMessage.findUnique({
-                where: {
-                    id: autoReplyOpt.type_id
-                }
-            })
+            let typeAutoReply: TypeAutoReplyMessage | null = null
+            if (autoReplyOpt) {
+                typeAutoReply = await this.prisma.typeAutoReplyMessage.findUnique({
+                    where: {
+                        id: autoReplyOpt.type_id
+                    }
+                })
+            }
 
             if (typeAutoReply && typeAutoReply.option_as === "text") {
                 await generalMethod.sendText(this.client, msg.key.remoteJid!, autoReplyOpt.option)
