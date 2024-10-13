@@ -90,7 +90,7 @@ pipeline {
       }
       stage('Git Clone for the kubeconfig code') {
         steps {
-          git branch: "${GIT_BRANCH_TO_SWITCH}", credentialsId: 'github', url: "https://${params.Repository_KubeConfig}"
+          git branch: "${GIT_BRANCH_TO_SWITCH}", credentialsId: 'github', url: "https://git.incenter.id/infrastucture/kube-cat.git"
           sh 'ls -a'
           sh '[ -f ".env" ] && rm ".env"'
         }
