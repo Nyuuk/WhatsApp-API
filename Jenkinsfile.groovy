@@ -80,7 +80,6 @@ pipeline {
       }
       stage('Docker push to Container Registry') {
         steps {
-          sh "gcloud auth configure-docker asia.gcr.io --quiet"
           sh "docker push ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER}"
         }
       }
