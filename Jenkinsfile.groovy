@@ -17,6 +17,12 @@ pipeline {
         TEXT_SUCCESS_BUILD = "${JOB_NAME} Build SUCCESS ✅"
         TEXT_FAILURE_BUILD = "${JOB_NAME} Build FAILURE ❌"
         TEXT_ABORTED_BUILD = "${JOB_NAME} Build ABORTED ⛔️"
+
+        FILE_ENVIRONTMENT = '.env.example'
+        IMAGE_REGISTRY_PATH = 'reg.icc.private/icc/whatsapp-api-adnan'
+        MANIFEST_PATH = "whatsapp-api-adnan/statefulset.yml"
+
+        GIT_BRANCH_TO_SWITCH = "master"
     }
     parameters {
       string(defaultValue: "adnan.khafabi@kelaspintar.id", description: 'git config user.email ', name: 'GIT_CONFIG_EMAIL')
@@ -34,34 +40,80 @@ pipeline {
           sendToWhatsappGroup("${env.TEXT_PRE_BUILD}", CHAT_ID)
         }
       }
-      stage('Change remote git') {
+    //   stage('Change remote git') {
+    //     steps {
+    //         script {
+    //             withCredentials([usernamePassword(credentialsId: 'adnan-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+    //                 commandSsh("git remote set-url origin https://${USERNAME}:${PASSWORD}@${Url_Git};")
+    //             }
+    //         }
+    //     }
+    //   }
+    //   stage('Pull Repository') {
+    //     steps {
+    //     //   sh 'ssh arch@docker.icc.private "cd whatsapp-api; git pull origin ${Application_Branch};"'
+    //       commandSsh("git pull origin ${Application_Branch};")
+    //     }
+    //   }
+    //   stage('Deploy to server') {
+    //     steps {
+    //         // sh 'ssh arch@docker.icc.private "cd whatsapp-api; docker compose up -d --build;"'
+    //         commandSsh('docker compose up -d --build;')
+    //         // commandSsh("docker compose exec app npm run prisma:migrate")
+    //         // commandSsh("docker compose exec app npm run prisma:generate")
+    //     }
+    //   }
+    //   stage('Change to default origin') {
+    //     steps {
+    //         commandSsh("git remote set-url origin https://${Url_Git};")
+    //   }
+    // }
+      stage('Copy-Config') {
         steps {
-            script {
-                withCredentials([usernamePassword(credentialsId: 'adnan-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    commandSsh("git remote set-url origin https://${USERNAME}:${PASSWORD}@${Url_Git};")
-                }
+          sh "cp ${FILE_ENVIRONTMENT} .env"
+        }
+      }
+      stage('Build Docker image') {
+        steps {
+          sh "docker build --no-cache -t ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER} -f Dockerfile ."
+        }
+      }
+      stage('Docker push to Container Registry') {
+        steps {
+          sh "gcloud auth configure-docker asia.gcr.io --quiet"
+          sh "docker push ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER}"
+        }
+      }
+      stage('Delete Docker image') {
+        steps {
+          sh "docker rmi -f ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER}"
+        }
+      }
+      stage('Git Clone for the kubeconfig code') {
+        steps {
+          git branch: "${GIT_BRANCH_TO_SWITCH}", credentialsId: 'github', url: "https://${params.Repository_KubeConfig}"
+          sh 'ls -a'
+          sh '[ -f ".env" ] && rm ".env"'
+        }
+      }
+      stage('Update GIT') {
+        steps {
+          script {
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+              withCredentials([usernamePassword(credentialsId: 'adnan-auth', passwordVariable: 'git_password', usernameVariable: 'git_username')]) {
+                sh "git config user.email '${params.GIT_CONFIG_EMAIL}' "
+                sh "git config user.name '${params.GIT_CONFIG_USERNAME}' "
+                sh "cat '${MANIFEST_PATH}' "
+                sh "sed -i 's+${IMAGE_REGISTRY_PATH}:[^ ]*+${IMAGE_REGISTRY_PATH}:${env.BUILD_NUMBER}+g' ${MANIFEST_PATH}"
+                sh "cat '${MANIFEST_PATH}' "
+                sh "git add '${MANIFEST_PATH}' "
+                sh "git commit -m 'Done by Jenkins Job changemanifest ${env.BUILD_NUMBER} WhatsApp-API' "
+                sh "git push https://$git_username:'$git_password'@git.incenter.id/infrastucture/kube-cat.git HEAD:'${GIT_BRANCH_TO_SWITCH}'"
+              }
             }
+          }
         }
       }
-      stage('Pull Repository') {
-        steps {
-        //   sh 'ssh arch@docker.icc.private "cd whatsapp-api; git pull origin ${Application_Branch};"'
-          commandSsh("git pull origin ${Application_Branch};")
-        }
-      }
-      stage('Deploy to server') {
-        steps {
-            // sh 'ssh arch@docker.icc.private "cd whatsapp-api; docker compose up -d --build;"'
-            commandSsh('docker compose up -d --build;')
-            // commandSsh("docker compose exec app npm run prisma:migrate")
-            // commandSsh("docker compose exec app npm run prisma:generate")
-        }
-      }
-      stage('Change to default origin') {
-        steps {
-            commandSsh("git remote set-url origin https://${Url_Git};")
-      }
-    }
   }
     post {
       success {
@@ -84,6 +136,6 @@ pipeline {
       }
     }
 }
-def commandSsh(String command) {
-  sh "ssh -o StrictHostKeyChecking=no arch@docker.icc.private \"cd whatsapp-api; ${command}\""
-}
+// def commandSsh(String command) {
+//   sh "ssh -o StrictHostKeyChecking=no arch@docker.icc.private \"cd whatsapp-api; ${command}\""
+// }

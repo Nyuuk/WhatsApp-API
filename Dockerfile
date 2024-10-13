@@ -24,4 +24,4 @@ RUN date
 RUN ls /app
 
 # ENTRYPOINT ["npm", "run", "start"]
-ENTRYPOINT ["npm", "run", "start"]
+CMD ["npm", "run", "start"]
