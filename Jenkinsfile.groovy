@@ -72,7 +72,8 @@ pipeline {
         steps {
           sh "cp ${FILE_ENVIRONTMENT} .env"
           sh "echo injection X_API_KEY"
-          sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
+          // sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
+          sh "sed -i 's/X_API_KEY[^ ]*\\$/X_API_KEY=HELLOWORLD/g' .env"
         }
       }
       stage('Build Docker image') {
