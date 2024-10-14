@@ -2,8 +2,8 @@
 pipeline {
   agent any
     environment {
-        // CHAT_ID = credentials('whatsapp-group')
-        CHAT_ID = "6285156803524@s.whatsapp.net"
+        CHAT_ID = credentials('whatsapp-group')
+        // CHAT_ID = "6285156803524@s.whatsapp.net"
         // Telegram Message Pre Build
         CURRENT_BUILD_NUMBER = "${currentBuild.number}"
         GIT_MESSAGE = sh(returnStdout: true, script: "git log -n 1 --format=%s ${GIT_COMMIT}").trim()
@@ -71,6 +71,8 @@ pipeline {
       stage('Copy-Config') {
         steps {
           sh "cp ${FILE_ENVIRONTMENT} .env"
+          sh "echo injection X_API_KEY"
+          sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
         }
       }
       stage('Build Docker image') {
