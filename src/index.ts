@@ -169,9 +169,10 @@ api.post("/send-message-group", async (req: express.Request, res) => {
         return
     }
     try {
-        const r = await WA.client.sendMessage(json.number, {
-            text: json.text
-        });
+        // const r = await WA.client.sendMessage(json.number, {
+        //     text: json.text
+        // });
+        const r = await WA.addingQueueMessage(json.number, json.text);
         ResponseHelper(res, r)
     } catch (error:any) {
         ResponseHelper(res, error, 404)
