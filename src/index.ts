@@ -243,8 +243,8 @@ app.use("/api", api);
 app.listen(process.env.APP_PORT, async () => {
     console.log("Listening on port 3000");
     WA.makeConnection();
-    WA.addingQueueMessage("6285156803524@s.whatsapp.net", "Server Bot API UP & RUNNING");
     setTimeout(() => {
+        WA.addingQueueMessage("6285156803524@s.whatsapp.net", "Server Bot API UP & RUNNING");
         WA.executeQueueMessage();
         WA.executeScheduleMessage();
     }, 5000)
