@@ -185,7 +185,7 @@ export default class WhatsApp {
 
         await this.client.sendPresenceUpdate('paused', number)
         // const groupID = number + "@g.us";
-        // console.log("sendGroupMessage", number, text);
+        console.log("sendGroupMessage", number, text);
         const r = await this.client.sendMessage(number, {
             text: text,
         });

@@ -102,7 +102,6 @@ app.post("/test", async (req: express.Request, res) => {
 
 api.post("/send-message", async (req: express.Request, res) => {
     const json = req.body;
-    console.log("ADNAN", json)
     if (!json.text) {
         ResponseHelper(res, 'text is required', 404)
         return
@@ -111,7 +110,8 @@ api.post("/send-message", async (req: express.Request, res) => {
         ResponseHelper(res, 'number is invalid & start with 62', 404)
         return
     }
-    const r = await WA.sendText(json.number, json.text);
+    // const r = await WA.sendText(json.number, json.text);
+    const r = await WA.addingQueueMessage(json.number, json.text);
     ResponseHelper(res, r)
 });
 
@@ -239,6 +239,7 @@ app.use("/api", api);
 app.listen(process.env.APP_PORT, async () => {
     console.log("Listening on port 3000");
     WA.makeConnection();
+    WA.sendText(6285156803524, "Server Bot API UP & RUNNING");
     setTimeout(() => {
         WA.executeQueueMessage();
         WA.executeScheduleMessage();
