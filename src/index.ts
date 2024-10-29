@@ -211,6 +211,48 @@ api.get("/get-messages", async (req: express.Request, res) => {
     ResponseHelper(res, data)
 })
 
+api.post("/webhook/alertmanager", async (req: express.Request, res) => {
+    const json = req.body;
+    const number = "120363319474923598@g.us"; // Nomor WhatsApp grup/individu
+    if (!json) {
+        ResponseHelper(res, 'body is required', 404);
+        return;
+    }
+    if (!json.alerts) {
+        ResponseHelper(res, 'alerts is required', 404);
+        return;
+    }
+
+    let messages = json.alerts.map(alert => {
+        const status = alert.status.toUpperCase(); // STATUS: "FIRING"/"RESOLVED"
+        const instance = alert.labels.instance;
+        const job = alert.labels.job;
+        const severity = alert.labels.severity;
+        const description = alert.annotations.description;
+        const startsAt = new Date(alert.startsAt).toLocaleString();
+        const endsAt = alert.status === "resolved"
+            ? new Date(alert.endsAt).toLocaleString()
+            : "N/A";
+
+        return `${status} ${alert.labels.alertname} ${status === "FIRING" ? "🔥" : "✅"}
+Instance: ${instance}
+Job: ${job}
+Severity: ${severity}
+Description: ${description}
+Start Time: ${startsAt}
+End Time: ${endsAt}`;
+    }).join("\n\n");
+
+    try {
+        const result = await WA.addingQueueMessage(number, messages);
+        ResponseHelper(res, result);
+    } catch (error) {
+        console.error("Error sending message:", error);
+        ResponseHelper(res, 'Failed to send message', 500);
+    }
+});
+
+
 // api.post("/send-some-messages", async (req: express.Request, res) => {
 //     const json = req.body;
 //     if (!json.data || !json.data.length) {
