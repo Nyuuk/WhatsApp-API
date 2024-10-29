@@ -223,7 +223,7 @@ api.post("/webhook/alertmanager", async (req: express.Request, res) => {
         return;
     }
 
-    let messages = json.alerts.map(alert => {
+    let messages = json.alerts.map((alert: any) => {
         const status = alert.status.toUpperCase(); // STATUS: "FIRING"/"RESOLVED"
         const instance = alert.labels.instance;
         const job = alert.labels.job;
