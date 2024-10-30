@@ -22,13 +22,13 @@ X-Api-Secret: 49647abca02744fcd8a35b1e3f1f170e8ad38a33b093986d797eaeeebeb7159c
 
 ###
 
-POST http://localhost:3000/api/send-message-schedule
+POST https://wa-api.nyuuk.my.id/api/send-message-schedule
 Content-Type: application/json
 X-Api-Key: HELLOWORLD
 X-Api-Secret: f938a55b31a5d40e180e99d3b19f658e62e4f59a920138156887c16aa572fd21
 
 {
     "number": "6285156803524@s.whatsapp.net",
-    "text": "schedule at 2024-10-01 04:05:00",
-    "cron": "5 4 * * *"
+    "text": "Masak nasi gih",
+    "cron": "30 5 * * *"
 }

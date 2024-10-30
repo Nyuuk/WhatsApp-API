@@ -1,4 +1,4 @@
-GET http://localhost:3000/api/get-messages?mark=false
+GET https://wa-api.nyuuk.my.id/api/get-messages?mark=false
 Content-Type: application/json
 X-Api-Key: HELLOWORLD
 # ini untuk mark true

@@ -55,6 +55,15 @@ pipeline {
           commandSsh("git pull origin ${Application_Branch};")
         }
       }
+      stage('Copy-Config') {
+        steps {
+          commandSsh("cp ${FILE_ENVIRONTMENT} .env && sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env")
+          // sh "cp ${FILE_ENVIRONTMENT} .env"
+          // sh "echo injection X_API_KEY"
+          // sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
+          // sh "sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env"
+        }
+      }
       stage('Deploy to server') {
         steps {
             // sh 'ssh arch@docker.icc.private "cd whatsapp-api; docker compose up -d --build;"'
@@ -68,15 +77,6 @@ pipeline {
             commandSsh("git remote set-url origin https://${Url_Git};")
       }
     }
-      stage('Copy-Config') {
-        steps {
-          commandSsh("cp ${FILE_ENVIRONTMENT} .env && sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env")
-          // sh "cp ${FILE_ENVIRONTMENT} .env"
-          // sh "echo injection X_API_KEY"
-          // sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
-          // sh "sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env"
-        }
-      }
       // stage('Build Docker image') {
       //   steps {
       //     sh "docker build --no-cache -t ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER} -f Dockerfile ."
