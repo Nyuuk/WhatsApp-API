@@ -40,82 +40,82 @@ pipeline {
           sendToWhatsappGroup("${env.TEXT_PRE_BUILD}", CHAT_ID)
         }
       }
-    //   stage('Change remote git') {
-    //     steps {
-    //         script {
-    //             withCredentials([usernamePassword(credentialsId: 'adnan-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-    //                 commandSsh("git remote set-url origin https://${USERNAME}:${PASSWORD}@${Url_Git};")
-    //             }
-    //         }
-    //     }
-    //   }
-    //   stage('Pull Repository') {
-    //     steps {
-    //     //   sh 'ssh arch@docker.icc.private "cd whatsapp-api; git pull origin ${Application_Branch};"'
-    //       commandSsh("git pull origin ${Application_Branch};")
-    //     }
-    //   }
-    //   stage('Deploy to server') {
-    //     steps {
-    //         // sh 'ssh arch@docker.icc.private "cd whatsapp-api; docker compose up -d --build;"'
-    //         commandSsh('docker compose up -d --build;')
-    //         // commandSsh("docker compose exec app npm run prisma:migrate")
-    //         // commandSsh("docker compose exec app npm run prisma:generate")
-    //     }
-    //   }
-    //   stage('Change to default origin') {
-    //     steps {
-    //         commandSsh("git remote set-url origin https://${Url_Git};")
-    //   }
-    // }
-      stage('Copy-Config') {
+      stage('Change remote git') {
         steps {
-          sh "cp ${FILE_ENVIRONTMENT} .env"
-          sh "echo injection X_API_KEY"
-          // sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
-          sh "sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env"
-        }
-      }
-      stage('Build Docker image') {
-        steps {
-          sh "docker build --no-cache -t ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER} -f Dockerfile ."
-        }
-      }
-      stage('Docker push to Container Registry') {
-        steps {
-          sh "docker push ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER}"
-        }
-      }
-      stage('Delete Docker image') {
-        steps {
-          sh "docker rmi -f ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER}"
-        }
-      }
-      stage('Git Clone for the kubeconfig code') {
-        steps {
-          git branch: "${GIT_BRANCH_TO_SWITCH}", credentialsId: 'github', url: "https://git.incenter.id/infrastucture/kube-cat.git"
-          sh 'ls -a'
-          sh '[ -f ".env" ] && rm ".env"'
-        }
-      }
-      stage('Update GIT') {
-        steps {
-          script {
-            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-              withCredentials([usernamePassword(credentialsId: 'adnan-auth', passwordVariable: 'git_password', usernameVariable: 'git_username')]) {
-                sh "git config user.email '${params.GIT_CONFIG_EMAIL}' "
-                sh "git config user.name '${params.GIT_CONFIG_USERNAME}' "
-                sh "cat '${MANIFEST_PATH}' "
-                sh "sed -i 's+${IMAGE_REGISTRY_PATH}:[^ ]*+${IMAGE_REGISTRY_PATH}:${env.BUILD_NUMBER}+g' ${MANIFEST_PATH}"
-                sh "cat '${MANIFEST_PATH}' "
-                sh "git add '${MANIFEST_PATH}' "
-                sh "git commit -m 'Done by Jenkins Job changemanifest ${env.BUILD_NUMBER} WhatsApp-API' "
-                sh "git push https://$git_username:'$git_password'@git.incenter.id/infrastucture/kube-cat.git HEAD:'${GIT_BRANCH_TO_SWITCH}'"
-              }
+            script {
+                withCredentials([usernamePassword(credentialsId: 'adnan-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    commandSsh("git remote set-url origin https://${USERNAME}:${PASSWORD}@${Url_Git};")
+                }
             }
-          }
         }
       }
+      stage('Pull Repository') {
+        steps {
+        //   sh 'ssh arch@docker.icc.private "cd whatsapp-api; git pull origin ${Application_Branch};"'
+          commandSsh("git pull origin ${Application_Branch};")
+        }
+      }
+      stage('Deploy to server') {
+        steps {
+            // sh 'ssh arch@docker.icc.private "cd whatsapp-api; docker compose up -d --build;"'
+            commandSsh('docker compose up -d --build;')
+            // commandSsh("docker compose exec app npm run prisma:migrate")
+            // commandSsh("docker compose exec app npm run prisma:generate")
+        }
+      }
+      stage('Change to default origin') {
+        steps {
+            commandSsh("git remote set-url origin https://${Url_Git};")
+      }
+    }
+      // stage('Copy-Config') {
+      //   steps {
+      //     sh "cp ${FILE_ENVIRONTMENT} .env"
+      //     sh "echo injection X_API_KEY"
+      //     // sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
+      //     sh "sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env"
+      //   }
+      // }
+      // stage('Build Docker image') {
+      //   steps {
+      //     sh "docker build --no-cache -t ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER} -f Dockerfile ."
+      //   }
+      // }
+      // stage('Docker push to Container Registry') {
+      //   steps {
+      //     sh "docker push ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER}"
+      //   }
+      // }
+      // stage('Delete Docker image') {
+      //   steps {
+      //     sh "docker rmi -f ${IMAGE_REGISTRY_PATH}:${BUILD_NUMBER}"
+      //   }
+      // }
+      // stage('Git Clone for the kubeconfig code') {
+      //   steps {
+      //     git branch: "${GIT_BRANCH_TO_SWITCH}", credentialsId: 'github', url: "https://git.incenter.id/infrastucture/kube-cat.git"
+      //     sh 'ls -a'
+      //     sh '[ -f ".env" ] && rm ".env"'
+      //   }
+      // }
+      // stage('Update GIT') {
+      //   steps {
+      //     script {
+      //       catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+      //         withCredentials([usernamePassword(credentialsId: 'adnan-auth', passwordVariable: 'git_password', usernameVariable: 'git_username')]) {
+      //           sh "git config user.email '${params.GIT_CONFIG_EMAIL}' "
+      //           sh "git config user.name '${params.GIT_CONFIG_USERNAME}' "
+      //           sh "cat '${MANIFEST_PATH}' "
+      //           sh "sed -i 's+${IMAGE_REGISTRY_PATH}:[^ ]*+${IMAGE_REGISTRY_PATH}:${env.BUILD_NUMBER}+g' ${MANIFEST_PATH}"
+      //           sh "cat '${MANIFEST_PATH}' "
+      //           sh "git add '${MANIFEST_PATH}' "
+      //           sh "git commit -m 'Done by Jenkins Job changemanifest ${env.BUILD_NUMBER} WhatsApp-API' "
+      //           sh "git push https://$git_username:'$git_password'@git.incenter.id/infrastucture/kube-cat.git HEAD:'${GIT_BRANCH_TO_SWITCH}'"
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
   }
     post {
       success {
