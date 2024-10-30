@@ -216,7 +216,7 @@ api.post("/webhook/alertmanager/:number", async (req: express.Request, res) => {
     const number = req.params.number;
     // const number = "120363319474923598@g.us"; // Nomor WhatsApp grup/individu
     if (!number || number.includes('@')) {
-        ResponseHelper(res, 'number is required', 404);
+        ResponseHelper(res, 'number is required ' + number, 404);
         return;
     }
     if (!json) {
@@ -239,13 +239,13 @@ api.post("/webhook/alertmanager/:number", async (req: express.Request, res) => {
             ? new Date(alert.endsAt).toLocaleString()
             : "N/A";
 
-        return `${status} ${alert.labels.alertname} ${status === "FIRING" ? "🔥" : "✅"}
-Instance: ${instance}
-Job: ${job}
-Severity: ${severity}
-Description: ${description}
-Start Time: ${startsAt}
-End Time: ${endsAt}`;
+        return `${status} *${alert.labels.alertname}* ${status === "FIRING" ? "🔥" : "✅"}
+Instance: *${instance}*
+Job: *${job}*
+Severity: *${severity}*
+Description: *${description}*
+Start Time: *${startsAt}*
+End Time: *${endsAt}*`;
     }).join("\n\n");
 
     try {
