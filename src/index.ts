@@ -215,7 +215,7 @@ api.post("/webhook/alertmanager/:number", async (req: express.Request, res) => {
     const json = req.body;
     const number = req.params.number;
     // const number = "120363319474923598@g.us"; // Nomor WhatsApp grup/individu
-    if (!number || number.includes('@')) {
+    if (!number) {
         ResponseHelper(res, 'number is required ' + number, 404);
         return;
     }
