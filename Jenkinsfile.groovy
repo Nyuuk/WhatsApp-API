@@ -140,5 +140,7 @@ pipeline {
     }
 }
 def commandSsh(String command) {
-  sh "ssh -o StrictHostKeyChecking=no arch@docker.icc.private \"cd whatsapp-api; ${command}\""
+  sshagent (credentials: ['SSH_JENKINS_FRAPPE']) {
+    sh "ssh -o StrictHostKeyChecking=no arch@docker.icc.private \"cd whatsapp-api; ${command}\""
+  }
 }
