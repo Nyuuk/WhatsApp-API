@@ -70,7 +70,7 @@ pipeline {
     }
       stage('Copy-Config') {
         steps {
-          commandSsh("cp ${FILE_ENVIRONTMENT} .env && sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env && sed -i 's/whatsapp-adnan?[^ ]*$/adnan-whatsapp?/g' .env")
+          commandSsh("cp ${FILE_ENVIRONTMENT} .env && sed -i 's/X_API_KEY[^ ]*${'$'}/X_API_KEY=HELLOWORLD/g' .env && sed -i 's/whatsapp-adnan?/adnan-whatsapp?/g' .env")
           // sh "cp ${FILE_ENVIRONTMENT} .env"
           // sh "echo injection X_API_KEY"
           // sh "sed -i 's/X_API_KEY[^ ]*$/X_API_KEY=HELLOWORLD/g' .env"
