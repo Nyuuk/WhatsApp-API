@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
+    "start": "nodemon src/index.ts",
+    "start:prod": "node dist/index.js",
+    "worker": "ts-node src/temporal/worker.ts",
+    "worker:prod": "node dist/temporal/worker.js",
     "build": "npx tsc --build",
     "prisma:migrate": "npx prisma migrate dev --name dev",
     "prisma:generate": "npx prisma generate"
@@ -16,6 +19,11 @@
   "dependencies": {
     "@hapi/boom": "^10.0.1",
     "@prisma/client": "^5.20.0",
+    "@temporalio/activity": "^1.11.3",
+    "@temporalio/client": "^1.11.3",
+    "@temporalio/worker": "^1.11.3",
+    "@temporalio/workflow": "^1.11.3",
+    "nanoid": "3.x",
     "@types/http-errors": "^2.0.4",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.11.17",
