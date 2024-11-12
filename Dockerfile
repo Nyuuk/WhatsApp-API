@@ -1,6 +1,6 @@
 FROM node:20.16.0 AS builder
 
-RUN apt-get update -y && apt-get install -y openssl
+# RUN apt-get update -y && apt-get install -y openssl
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npm run build
 
 FROM node:20.16.0 AS runner
 
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y openssl net-tools curl
 
 WORKDIR /app
 
