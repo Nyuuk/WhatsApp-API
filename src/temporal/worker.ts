@@ -18,8 +18,8 @@ async function run() {
   // Step 2: Register Workflows and Activities with the Worker.
   const worker = await Worker.create({
     connection,
-    namespace: 'default',
-    taskQueue: 'hello-world',
+    namespace: process.env.TEMPORAL_NAMESPACE,
+    taskQueue: process.env.TEMPORAL_TASKQUEUE || "whatsapp-adnan",
     // Workflows are registered using a path as they run in a separate JS context.
     workflowsPath: require.resolve('./workflows'),
     activities,

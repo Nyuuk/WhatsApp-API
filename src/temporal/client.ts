@@ -1,6 +1,5 @@
 // @@@SNIPSTART typescript-hello-client
 import { Connection, Client } from '@temporalio/client';
-import { example } from './workflows';
 import { nanoid } from 'nanoid';
 
 import dotenv from "dotenv";
@@ -20,14 +19,16 @@ async function run() {
     connection,
     // namespace: 'foo.bar', // connects to 'default' namespace if not specified
   });
-
-  for (let i = 0; i < 100; i++) {
+  const data: string[] = []
+  for (let i = 0; i < 50; i++) {
     const handle = client.workflow.start("sendMsg", {
-      taskQueue: 'hello-world',
+      taskQueue: process.env.TEMPORAL_TASKQUEUE || "whatsapp-adnan",
       args: ["6285156803524@s.whatsapp.net", `Temporal ${i}`],
-      workflowId: 'testing-' + i + '-' + nanoid(),
+      workflowId: 'pesan-ke-' + i + '-' + nanoid(),
     });
-    console.log((await handle).workflowId)
+    const t = (await handle).workflowId
+    console.log(`Started workflow ${t}`);
+    data.push(t)
   }
   // const handle = await client.workflow.start("sendMsg", {
   //   taskQueue: 'hello-world',
