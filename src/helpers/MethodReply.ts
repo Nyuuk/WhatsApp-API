@@ -81,7 +81,7 @@ const myMethod: MyMethod = {
         console.log("sendRandomArray nih bossss ------------------")
         const jid = msg.key.remoteJid
         const textMsg = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
-        const splitText = textMsg.split(" ")
+        const splitText = textMsg.toLocaleLowerCase().split(" ")
         /// looping split text
         for (let i = 0; i < splitText.length; i++) {
             // get prefix on autoReplyMessage
