@@ -115,12 +115,41 @@ const myMethod: MyMethod = {
                 messageWillSend && await generalMethod.sendTextReply(client, jid!, messageWillSend!, msg)
             }
         }
+    },
+    arrayWithVariable: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
+        console.log("arraywithVariable nih bossss ------------------")
+        const jid = msg.key.remoteJid
+        const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
+        const textSplit = text.toLocaleLowerCase().split(" ")
+        for (let i = 0; i < textSplit.length; i++) {
+            const elementText = textSplit[i]
+            const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText, prisma)
+            if (prefix) {
+                const description = prefix.description
+                const {txt, mention} = generalMethod.compileMessageVariable(description!)
+                console.log("kodeNuklir ----------------", txt)
+                txt && await generalMethod.sendTextReply(client, jid!, txt, msg)
+            }
+        }
     }
 }
 const generalMethod = {
     beautyTextList: (title: string, text: string) => {
         const t = `**${title}**\n----\n\n${text}\n\n----`
         return t
+    },
+    compileMessageVariable: (text: string): { txt: string, mention: string[] } => {
+        // kodenuklir
+        let txt: string, mention: string[] = []
+        txt = text.replace("{{kode_nuklir}}", generalMethod.randomTextWithRegex("[SPGAE]{3}-[0-9]{3}"))
+        // mention
+        const regex = new RegExp(/\{\{mention:@(\d+)\}\}/g)
+        mention = [...txt.matchAll(regex)].map((n) => n[1] + '@s.whatsapp.net')
+        txt = txt.replace(regex, '@$1')
+
+        console.log("compileMessageVariable", {txt, mention})
+
+        return {txt, mention}
     },
     findElementPrefixOnAutoReplyMessage: async (prefix: string, prisma?: PrismaClient) => {
         return await prisma?.autoReplyMessage.findFirst({
@@ -148,7 +177,7 @@ const generalMethod = {
             text: text,
         });
     },
-    sendTextReply: async (client: WASocket, number: string, text: string, msg: WAMessage) => {
+    sendTextReply: async (client: WASocket, number: string, text: string, msg: WAMessage, mention?: string[]) => {
         await client.presenceSubscribe(number)
         await new Promise((resolve) => { setTimeout(resolve, 500) })
 
@@ -158,11 +187,20 @@ const generalMethod = {
         await client.sendPresenceUpdate('paused', number)
         // const groupID = number + "@g.us";
         // console.log("sendGroupMessage", number, text);
-        await client.sendMessage(number, {
-            text: text,
-        }, {
-            quoted: msg
-        });
+        if (mention) {
+            await client.sendMessage(number, {
+                text: text,
+                mentions: mention
+            }, {
+                quoted: msg
+            });
+        } else {
+            await client.sendMessage(number, {
+                text: text,
+            }, {
+                quoted: msg
+            });
+        }
     },
     cronParser: (cron: string, lastSuccess: Date): CronExpression => {
         const option = {
