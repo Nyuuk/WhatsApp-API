@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { WAMessage, WASocket } from "@whiskeysockets/baileys";
 import { CronExpression, parseExpression } from "cron-parser";
+import RandExp from "randexp";
 
 interface MyMethod {
     // sendText: (client: WASocket, number: string, text: string) => Promise<void>;
@@ -93,8 +94,25 @@ const myMethod: MyMethod = {
                 const arrToSendMessage = prefix.description?.split(",") ?? []
                 const randomIndex = Math.floor(Math.random() * arrToSendMessage.length)
                 const text = arrToSendMessage[randomIndex]
-                text && await generalMethod.sendText(client, jid!, text)
+                // text && await generalMethod.sendText(client, jid!, text)
+                text && await generalMethod.sendTextReply(client, jid!, text, msg)
                 break
+            }
+        }
+    },
+    kodeNuklir: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
+        console.log("kodeNuklir nih bossss ------------------")
+        const jid = msg.key.remoteJid
+        const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
+        const textSplit = text.toLocaleLowerCase().split(" ")
+        for (let i = 0; i < textSplit.length; i++) {
+            const elementText = textSplit[i]
+            const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText, prisma)
+            if (prefix) {
+                const description = prefix.description
+                const messageWillSend = description?.replace("{{kode_nuklir}}", generalMethod.randomTextWithRegex("[A-Z]{3}-[0-9]{3}"))
+                console.log("kodeNuklir ----------------", messageWillSend)
+                messageWillSend && await generalMethod.sendTextReply(client, jid!, messageWillSend!, msg)
             }
         }
     }
@@ -111,6 +129,11 @@ const generalMethod = {
             }
         })
     },
+    randomTextWithRegex: (reg: string) => {
+        //create text from regex
+        const regex = new RandExp(new RegExp(reg))
+        return regex.gen()
+    },
     sendText: async (client: WASocket, number: string, text: string) => {
         await client.presenceSubscribe(number)
         await new Promise((resolve) => { setTimeout(resolve, 500) })
@@ -123,6 +146,22 @@ const generalMethod = {
         // console.log("sendGroupMessage", number, text);
         await client.sendMessage(number, {
             text: text,
+        });
+    },
+    sendTextReply: async (client: WASocket, number: string, text: string, msg: WAMessage) => {
+        await client.presenceSubscribe(number)
+        await new Promise((resolve) => { setTimeout(resolve, 500) })
+
+        await client.sendPresenceUpdate('composing', number)
+        await new Promise((resolve) => { setTimeout(resolve, 2000) })
+
+        await client.sendPresenceUpdate('paused', number)
+        // const groupID = number + "@g.us";
+        // console.log("sendGroupMessage", number, text);
+        await client.sendMessage(number, {
+            text: text,
+        }, {
+            quoted: msg
         });
     },
     cronParser: (cron: string, lastSuccess: Date): CronExpression => {
