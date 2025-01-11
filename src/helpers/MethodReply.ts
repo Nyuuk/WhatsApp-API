@@ -77,7 +77,7 @@ const myMethod: MyMethod = {
         const text = generalMethod.beautyTextList("List All Type", replyMSG)
         await generalMethod.sendText(client, jid!, text)
     },
-    sendRandomArray: async (client: WASocket, msg: WAMessage) => {
+    sendRandomArray: async (client: WASocket, msg: WAMessage, prisma?: PrismaClient) => {
         console.log("sendRandomArray nih bossss ------------------")
         const jid = msg.key.remoteJid
         const textMsg = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
@@ -86,7 +86,7 @@ const myMethod: MyMethod = {
         for (let i = 0; i < splitText.length; i++) {
             // get prefix on autoReplyMessage
             const elementText = splitText[i]
-            const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText)
+            const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText, prisma)
             console.log("elementText -------------- ", elementText, '-----', prefix)
             if (prefix) {
                 // get Description on typeAutoReplyMessage
