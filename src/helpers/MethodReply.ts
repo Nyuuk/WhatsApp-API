@@ -83,7 +83,7 @@ const myMethod: MyMethod = {
         const textMsg = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
         const splitText = textMsg.split(" ")
         /// looping split text
-        for (let i = 1; i < splitText.length; i++) {
+        for (let i = 0; i < splitText.length; i++) {
             // get prefix on autoReplyMessage
             const elementText = splitText[i]
             console.log("elementText -------------- ", elementText)
