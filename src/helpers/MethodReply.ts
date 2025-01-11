@@ -78,6 +78,7 @@ const myMethod: MyMethod = {
         await generalMethod.sendText(client, jid!, text)
     },
     sendRandomArray: async (client: WASocket, msg: WAMessage) => {
+        console.log("sendRandomArray nih bossss ------------------")
         const jid = msg.key.remoteJid
         const textMsg = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
         const splitText = textMsg.split(" ")
@@ -85,6 +86,7 @@ const myMethod: MyMethod = {
         for (let i = 1; i < splitText.length; i++) {
             // get prefix on autoReplyMessage
             const elementText = splitText[i]
+            console.log("elementText -------------- ", elementText)
             const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText)
             if (prefix) {
                 // get Description on typeAutoReplyMessage

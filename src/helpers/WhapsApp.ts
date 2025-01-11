@@ -376,27 +376,52 @@ export default class WhatsApp {
                     console.error(`Function ${autoReplyOpt.option} not found`)
                 }
             }
-        } else if (allPrefixAutoReply.includes(command)) {
-            const indexPrefix = allPrefixAutoReply.indexOf(command)
-            const autoReplyOpt = autoReplyMessage[indexPrefix]
-            let typeAutoReply: TypeAutoReplyMessage | null = null
-            if (autoReplyOpt) {
-                typeAutoReply = await this.prisma.typeAutoReplyMessage.findUnique({
-                    where: {
-                        id: autoReplyOpt.type_id
+            /// validasi jika text split lebih dari 0
+            // } else if (allPrefixAutoReply.includes(command)) {
+        } else if (textSplit.length > 0) {
+            for (let i = 0; i < textSplit.length; i++) {
+                if (allPrefixAutoReply.includes(textSplit[i])) {
+                    const indexPrefix = allPrefixAutoReply.indexOf(textSplit[i])
+                    const autoReplyOpt = autoReplyMessage[indexPrefix]
+                    let typeAutoReply: TypeAutoReplyMessage | null = null
+                    if (autoReplyOpt) {
+                        typeAutoReply = await this.prisma.typeAutoReplyMessage.findUnique({
+                            where: {
+                                id: autoReplyOpt.type_id
+                            }
+                        })
                     }
-                })
-            }
-
-            if (typeAutoReply && typeAutoReply.option_as === "text") {
-                await generalMethod.sendText(this.client, msg.key.remoteJid!, autoReplyOpt.option)
-            } else if (typeAutoReply && typeAutoReply.option_as === "function") {
-                if (typeof myMethod[autoReplyOpt.option] === 'function') {
-                    await myMethod[autoReplyOpt.option](this.client, msg, this.prisma)
-                } else {
-                    console.error(`Function ${autoReplyOpt.option} not found`)
+                    if (typeAutoReply && typeAutoReply.option_as === "text") {
+                        await generalMethod.sendText(this.client, msg.key.remoteJid!, autoReplyOpt.option)
+                    } else if (typeAutoReply && typeAutoReply.option_as === "function") {
+                        if (typeof myMethod[autoReplyOpt.option] === 'function') {
+                            await myMethod[autoReplyOpt.option](this.client, msg, this.prisma)
+                        } else {
+                            console.error(`Function ${autoReplyOpt.option} not found`)
+                        }
+                    }
                 }
             }
+            // const indexPrefix = allPrefixAutoReply.indexOf(command)
+            // const autoReplyOpt = autoReplyMessage[indexPrefix]
+            // let typeAutoReply: TypeAutoReplyMessage | null = null
+            // if (autoReplyOpt) {
+            //     typeAutoReply = await this.prisma.typeAutoReplyMessage.findUnique({
+            //         where: {
+            //             id: autoReplyOpt.type_id
+            //         }
+            //     })
+            // }
+
+            // if (typeAutoReply && typeAutoReply.option_as === "text") {
+            //     await generalMethod.sendText(this.client, msg.key.remoteJid!, autoReplyOpt.option)
+            // } else if (typeAutoReply && typeAutoReply.option_as === "function") {
+            //     if (typeof myMethod[autoReplyOpt.option] === 'function') {
+            //         await myMethod[autoReplyOpt.option](this.client, msg, this.prisma)
+            //     } else {
+            //         console.error(`Function ${autoReplyOpt.option} not found`)
+            //     }
+            // }
         }
 
     }
