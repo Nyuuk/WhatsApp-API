@@ -86,8 +86,8 @@ const myMethod: MyMethod = {
         for (let i = 0; i < splitText.length; i++) {
             // get prefix on autoReplyMessage
             const elementText = splitText[i]
-            console.log("elementText -------------- ", elementText)
             const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText)
+            console.log("elementText -------------- ", elementText, '-----', prefix)
             if (prefix) {
                 // get Description on typeAutoReplyMessage
                 const arrToSendMessage = prefix.description?.split(",") ?? []
