@@ -121,7 +121,11 @@ export default class WhatsApp {
                 if (upsert.type === "notify") {
                     for (const msg of upsert.messages) {
                         console.log("msg", msg);
-                        this.executeAutoReply(msg);
+                        if (!msg.key.fromMe) {
+                            const isGroup = msg.key.remoteJid?.includes("@g.us") ?? false
+                            this.addingToMsgDatabase(msg, isGroup);
+                            this.executeAutoReply(msg);
+                        }
                         // jika group id
                         // const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
                         // if (msg.key.remoteJid?.includes("@g.us")) {
@@ -347,7 +351,7 @@ export default class WhatsApp {
         })
 
         const text = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
-        const textSplit = text.split(" ")
+        const textSplit = text.toLocaleLowerCase().split(" ")
         const command = textSplit[0]
 
         // validasi not wildcard

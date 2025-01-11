@@ -76,12 +76,38 @@ const myMethod: MyMethod = {
         }
         const text = generalMethod.beautyTextList("List All Type", replyMSG)
         await generalMethod.sendText(client, jid!, text)
+    },
+    sendRandomArray: async (client: WASocket, msg: WAMessage) => {
+        const jid = msg.key.remoteJid
+        const textMsg = (msg.message?.conversation || msg.message?.extendedTextMessage?.text) ?? ""
+        const splitText = textMsg.split(" ")
+        /// looping split text
+        for (let i = 1; i < splitText.length; i++) {
+            // get prefix on autoReplyMessage
+            const elementText = splitText[i]
+            const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText)
+            if (prefix) {
+                // get Description on typeAutoReplyMessage
+                const arrToSendMessage = prefix.description?.split(",") ?? []
+                const randomIndex = Math.floor(Math.random() * arrToSendMessage.length)
+                const text = arrToSendMessage[randomIndex]
+                text && await generalMethod.sendText(client, jid!, text)
+                break
+            }
+        }
     }
 }
 const generalMethod = {
     beautyTextList: (title: string, text: string) => {
         const t = `**${title}**\n----\n\n${text}\n\n----`
         return t
+    },
+    findElementPrefixOnAutoReplyMessage: async (prefix: string, prisma?: PrismaClient) => {
+        return await prisma?.autoReplyMessage.findFirst({
+            where: {
+                prefix: prefix
+            }
+        })
     },
     sendText: async (client: WASocket, number: string, text: string) => {
         await client.presenceSubscribe(number)
