@@ -91,7 +91,7 @@ const myMethod: MyMethod = {
             console.log("elementText -------------- ", elementText, '-----', prefix)
             if (prefix) {
                 // get Description on typeAutoReplyMessage
-                const arrToSendMessage = prefix.description?.split(",") ?? []
+                const arrToSendMessage = prefix.description?.split("|") ?? []
                 const randomIndex = Math.floor(Math.random() * arrToSendMessage.length)
                 const text = arrToSendMessage[randomIndex]
                 // text && await generalMethod.sendText(client, jid!, text)
@@ -125,10 +125,12 @@ const myMethod: MyMethod = {
             const elementText = textSplit[i]
             const prefix = await generalMethod.findElementPrefixOnAutoReplyMessage(elementText, prisma)
             if (prefix) {
-                const description = prefix.description
+                const arrrDesc = prefix.description?.split("|") ?? []
+                const randomIndex = Math.floor(Math.random() * arrrDesc.length)
+                const description = arrrDesc[randomIndex]
                 const {txt, mention} = generalMethod.compileMessageVariable(description!)
                 console.log("kodeNuklir ----------------", txt)
-                txt && await generalMethod.sendTextReply(client, jid!, txt, msg)
+                txt && await generalMethod.sendTextReply(client, jid!, txt, msg, mention)
             }
         }
     }
