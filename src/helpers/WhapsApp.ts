@@ -345,7 +345,8 @@ export default class WhatsApp {
     }
 
     async executeAutoReply(msg: WAMessage) {
-        const autoReplyMessage = await this.prisma.autoReplyMessage.findMany();
+        // const autoReplyMessage = await this.prisma.autoReplyMessage.findMany();
+        const autoReplyMessage = await generalMethod(this.prisma);
         const allPrefixAutoReply = autoReplyMessage.map((msg) => {
             return msg.prefix
         })
